@@ -200,13 +200,11 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
           <rect x="80" y="5" width="80" height="50" fill="#e8dfc8" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-top" x="80" y="5" width="80" height="50" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="120" y="27" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">TOP</text>
-          <text x="120" y="39" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">W × L</text>
         </g>
         <g class="fh on" id="fh-front" onclick="setFace('front')">
           <rect x="80" y="58" width="80" height="60" fill="#f0e6cc" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-front" x="80" y="58" width="80" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="120" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">FRONT</text>
-          <text x="120" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">W × H</text>
         </g>
         <g class="fh" id="fh-bottom" onclick="setFace('bottom')">
           <rect x="80" y="121" width="80" height="50" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
@@ -217,23 +215,17 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
           <rect x="14" y="58" width="62" height="60" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-left" x="14" y="58" width="62" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="45" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">LEFT</text>
-          <text x="45" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">L × H</text>
         </g>
         <g class="fh" id="fh-right" onclick="setFace('right')">
           <rect x="164" y="58" width="62" height="60" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-right" x="164" y="58" width="62" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="195" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">RIGHT</text>
-          <text x="195" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">L × H</text>
         </g>
         <g class="fh" id="fh-back" onclick="setFace('back')">
           <rect x="230" y="58" width="34" height="60" fill="#e8dfc8" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-back" x="230" y="58" width="34" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="247" y="86" text-anchor="middle" font-size="8" fill="#888" font-family="sans-serif" font-weight="700">BACK</text>
-          <text x="247" y="96" text-anchor="middle" font-size="7" fill="#aaa" font-family="sans-serif">W×H</text>
         </g>
-        <text x="119" y="3" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif">← W →</text>
-        <text x="10" y="91" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif" transform="rotate(-90,10,91)">H</text>
-        <text x="268" y="91" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif">L</text>
       </svg>
     </div>
     <div class="face-clears" id="fclears"></div>
@@ -275,7 +267,6 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     <div>Per layer <span id="ov-pl">—</span></div>
     <div>Stack height <span id="ov-sh">—</span></div>
     <div>Total weight <span id="ov-wt">—</span></div>
-    <div class="ov-blue" id="ov-oh-row" style="display:none">Overhang <span id="ov-oh">—</span></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -286,12 +277,11 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 // ── state
 let unit='in', orient='auto', activeFace='front';
 let fImgData={front:null,back:null,left:null,right:null,top:null,bottom:null};
-let fTexCache={front:null,back:null,left:null,right:null,top:null,bottom:null};
+let fTexCache={};
 let scene,cam,rnd,ctrl,boxGrp,palGrp,mainGrp,lastR=null;
 const IC=2.54;
 const PALS=[{n:'GMA / US',w:48,d:40},{n:'EUR 1',w:43.3,d:35.4},{n:'EUR 2',w:47.2,d:31.5},{n:'Square',w:42,d:42}];
 
-// ── units
 const ul=()=>unit==='cm'?'cm':'in';
 const wl=()=>unit==='cm'?'kg':'lb';
 const toIn=v=>unit==='cm'?v/IC:v;
@@ -299,7 +289,7 @@ const toD=v=>unit==='cm'?+(v*IC).toFixed(1):v;
 const wD=lb=>unit==='cm'?+(lb*0.453592).toFixed(1):lb;
 
 function setUnit(u){
-  if(unit===u)return; const p=unit; unit=u;
+  if(unit===u)return; unit=u;
   ['palW','palD','palMaxH','boxW','boxL','boxH','overhang'].forEach(id=>{
     const e=document.getElementById(id),v=parseFloat(e.value)||0;
     e.value=u==='cm'?+(v*IC).toFixed(1):+(v/IC).toFixed(2);
@@ -313,405 +303,149 @@ function setUnit(u){
 }
 function updLabels(){
   const u=ul(),w=wl();
-  const lm={
-    'l-pw':`Width W (${u})`,'l-pd':`Length L (${u})`,'l-ph':`Max height (${u})`,'l-mw':`Max weight (${w})`,
-    'l-bw':`W (${u})`,'l-bl':`L (${u})`,'l-bh':`H (${u})`,'l-bwt':`Weight/box (${w})`,'l-ovh':`Overhang (${u})`
-  };
+  const lm={'l-pw':`Width W (${u})`,'l-pd':`Length L (${u})`,'l-ph':`Max height (${u})`,'l-mw':`Max weight (${w})`,'l-bw':`W (${u})`,'l-bl':`L (${u})`,'l-bh':`H (${u})`,'l-bwt':`Weight/box (${w})`,'l-ovh':`Overhang (${u})`};
   Object.entries(lm).forEach(([id,t])=>{const e=document.getElementById(id);if(e)e.textContent=t;});
   document.getElementById('wt-lbl').textContent=`Weight (${w})`;
 }
-function updPP(){
-  PALS.forEach((p,i)=>{
-    const e=document.getElementById('pps'+i); if(!e)return;
-    e.textContent=unit==='cm'?`${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm`:`${p.w} × ${p.d} in`;
-  });
-}
-function setPP(i){
-  const p=PALS[i];
-  document.getElementById('palW').value=unit==='cm'?+(p.w*IC).toFixed(1):p.w;
-  document.getElementById('palD').value=unit==='cm'?+(p.d*IC).toFixed(1):p.d;
-  document.querySelectorAll('.pal-pre').forEach((e,j)=>e.classList.toggle('on',j===i));
-  calc();toast(`Preset: ${p.n}`);
-}
-function setOrient(o){
-  orient=o;
-  ['auto','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));
-  calc();
-}
+function updPP(){PALS.forEach((p,i)=>{const e=document.getElementById('pps'+i); if(e) e.textContent=unit==='cm'?`${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm`:`${p.w} × ${p.d} in`;});}
+function setPP(i){const p=PALS[i];document.getElementById('palW').value=unit==='cm'?+(p.w*IC).toFixed(1):p.w;document.getElementById('palD').value=unit==='cm'?+(p.d*IC).toFixed(1):p.d;document.querySelectorAll('.pal-pre').forEach((e,j)=>e.classList.toggle('on',j===i));calc();}
+function setOrient(o){orient=o;['auto','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));calc();}
 function lslide(el){document.getElementById('lv').textContent=el.value;document.getElementById('maxL').value=el.value;calc();}
 function opslide(el){document.getElementById('opv').textContent=el.value;draw();}
-
-// ── face interactions
-function setFace(f){
-  activeFace=f;
-  document.querySelectorAll('.fh').forEach(g=>g.classList.remove('on'));
-  document.getElementById('fh-'+f).classList.add('on');
-}
-setFace('front');
+function setFace(f){activeFace=f;document.querySelectorAll('.fh').forEach(g=>g.classList.toggle('on',g.id==='fh-'+f));}
 
 window.addEventListener('paste',e=>{
   const it=Array.from(e.clipboardData.items).find(x=>x.type.includes('image'));
   if(!it)return;
   const rd=new FileReader();
   rd.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      fImgData[activeFace]=ev.target.result;
-      fTexCache[activeFace]=null;
-      const si=document.getElementById('fi-'+activeFace);
-      si.setAttribute('href',ev.target.result);si.style.display='block';
-      document.getElementById('fh-'+activeFace).classList.add('img');
-      updFClears();draw();toast(`Image → ${activeFace}`);
-    };
-    img.src=ev.target.result;
+    fImgData[activeFace]=ev.target.result; fTexCache={};
+    const si=document.getElementById('fi-'+activeFace); si.setAttribute('href',ev.target.result); si.style.display='block';
+    document.getElementById('fh-'+activeFace).classList.add('img'); draw(); toast(`Image → ${activeFace}`);
   };
   rd.readAsDataURL(it.getAsFile());
 });
 
-function clearFace(f){
-  fImgData[f]=null;fTexCache[f]=null;
-  const si=document.getElementById('fi-'+f);si.style.display='none';si.removeAttribute('href');
-  document.getElementById('fh-'+f).classList.remove('img');
-  updFClears();draw();
-}
-function updFClears(){
-  const c=document.getElementById('fclears');c.innerHTML='';
-  Object.keys(fImgData).forEach(f=>{
-    if(!fImgData[f])return;
-    const b=document.createElement('button');b.className='fc-btn';b.textContent='× '+f;
-    b.onclick=()=>clearFace(f);c.appendChild(b);
-  });
-}
-
 function getFTex(face){
-  if(fTexCache[face])return fTexCache[face];
-  const cv=document.createElement('canvas');cv.width=512;cv.height=512;
-  const ctx=cv.getContext('2d');
   const base=document.getElementById('boxCol').value;
   const tape=document.getElementById('tapeCol').value;
+  const key=face+base+tape+(fImgData[face]?'y':'n');
+  if(fTexCache[key])return fTexCache[key];
 
-  ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+  const cv=document.createElement('canvas'); cv.width=512; cv.height=512;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle=base; ctx.fillRect(0,0,512,512);
+
   // grain
-  ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.lineWidth=1;
   for(let i=0;i<512;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,512);ctx.stroke();}
 
   if(face==='top'){
-    // flap cross
-    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2.5;
+    ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=2.5;
     ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
     ctx.beginPath();ctx.moveTo(0,256);ctx.lineTo(512,256);ctx.stroke();
-    // tape on cross
-    ctx.fillStyle=tape+'88'; // Посилено насиченість для видимості
-    ctx.fillRect(238,0,36,512);ctx.fillRect(0,238,512,36);
+    ctx.fillStyle=tape+'88'; ctx.fillRect(238,0,36,512); ctx.fillRect(0,238,512,36);
   }
 
-  // shading
-  const sh=ctx.createLinearGradient(0,0,512,512);
-  sh.addColorStop(0,'rgba(255,255,255,.1)');sh.addColorStop(1,'rgba(0,0,0,.1)');
-  ctx.fillStyle=sh;ctx.fillRect(0,0,512,512);
-
-  if(fImgData[face]){
-    const im=new Image();
-    im.src=fImgData[face];
-    ctx.save();
-    ctx.globalCompositeOperation = 'multiply';
-    ctx.drawImage(im,0,0,512,512);
-    ctx.restore();
+  const imgToDraw=fImgData[face];
+  if(imgToDraw){
+    const im=new Image(); im.src=imgToDraw;
+    ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.drawImage(im,0,0,512,512); ctx.restore();
   }
 
-  fTexCache[face]=new THREE.CanvasTexture(cv);
-  return fTexCache[face];
+  const tex=new THREE.CanvasTexture(cv); fTexCache[key]=tex; return tex;
 }
 
-// ── pallet
-const PTOPH=5.5;
+// ── REAL PALLET
 function buildPallet(pW,pD){
   palGrp.clear();
-  const dk=new THREE.MeshStandardMaterial({color:0x6b4412,roughness:.93,metalness:0});
-  const lt=new THREE.MeshStandardMaterial({color:0xa07030,roughness:.88,metalness:0});
-  const md=new THREE.MeshStandardMaterial({color:0x8a5820,roughness:.9,metalness:0});
-
+  const dk=new THREE.MeshStandardMaterial({color:0x6b4412,roughness:.93});
+  const lt=new THREE.MeshStandardMaterial({color:0xa07030,roughness:.88});
   function plank(mat,x,y,z,w,h,d){
-    const g=new THREE.BoxGeometry(w,h,d),m=new THREE.Mesh(g,mat);
-    m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;palGrp.add(m);
-    const el=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x3a2008,transparent:true,opacity:.25}));
-    el.position.copy(m.position);palGrp.add(el);
+    const g=new THREE.BoxGeometry(w,h,d), m=new THREE.Mesh(g,mat);
+    m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; palGrp.add(m);
   }
-
-  const BH=0.85,SH=3.6,TH=0.9,BPW=4.2,STGW=3.6;
-  const yB=BH/2,yS=BH+SH/2,yT=BH+SH+TH/2;
-
-  // 3 bottom boards along depth
-  [-pD/2+BPW/2, 0, pD/2-BPW/2].forEach((z,i)=>plank(i===1?md:dk, 0,yB,z, pW,BH,BPW));
-
-  // 3×3 stringer blocks
-  const sxs=[-pW/2+STGW/2+.5, 0, pW/2-STGW/2-.5];
-  const szs=[-pD/2+STGW/2+.5, 0, pD/2-STGW/2-.5];
-  sxs.forEach((x,xi)=>szs.forEach((z,zi)=>plank((xi+zi)%2===0?lt:md, x,yS,z, STGW,SH,STGW)));
-
-  // 6 top deck planks (evenly spaced, full width)
-  const nP=6, pW2=4.5;
-  const totalZ=nP*pW2, gapZ=(pD-totalZ)/(nP-1);
-  for(let i=0;i<nP;i++){
-    const z=-pD/2+pW2/2+i*(pW2+gapZ);
-    plank(i%2===0?lt:md, 0,yT,z, pW,TH,pW2);
-  }
+  const BH=0.85,SH=3.6,TH=0.9;
+  const yB=BH/2, yS=BH+SH/2, yT=BH+SH+TH/2;
+  [-pD/2+2.1, 0, pD/2-2.1].forEach(z=>plank(dk, 0,yB,z, pW,BH,4.2));
+  [-pW/2+1.8, 0, pW/2-1.8].forEach(x=>[-pD/2+1.8, 0, pD/2-1.8].forEach(z=>plank(lt, x,yS,z, 3.6,SH,3.6)));
+  for(let i=0;i<6;i++){ const z=-pD/2+2.25+i*((pD-4.5)/5); plank(lt, 0,yT,z, pW,TH,4.5); }
   palGrp.userData.topY=BH+SH+TH;
 }
-function ptop(){return palGrp.userData.topY||PTOPH;}
+function ptop(){return palGrp.userData.topY||5.5;}
 
-// ── layout engine
 function calcLayout(pW,pD,bW,bL,bH,oh,mode){
   const eW=pW+oh*2, eD=pD+oh*2;
-  const A={cols:Math.floor(eW/bW),rows:Math.floor(eD/bL),bX:bW,bZ:bL,lH:bH,label:'flat'};
-  A.per=A.cols*A.rows;
-  const B={cols:Math.floor(eW/bL),rows:Math.floor(eD/bW),bX:bL,bZ:bW,lH:bH,label:'rotated'};
-  B.per=B.cols*B.rows;
-  const C={cols:Math.floor(eW/bW),rows:Math.floor(eD/bH),bX:bW,bZ:bH,lH:bL,label:'standing'};
-  C.per=C.cols*C.rows;
-
-  if(mode==='flat')return{...A,mixed:false};
-  if(mode==='rot')return{...B,mixed:false};
-  if(mode==='auto'){const best=[A,B,C].reduce((a,b)=>b.per>a.per?b:a);return{...best,mixed:false};}
-
+  const A={cols:Math.floor(eW/bW),rows:Math.floor(eD/bL),bX:bW,bZ:bL,lH:bH,per:Math.floor(eW/bW)*Math.floor(eD/bL)};
+  const B={cols:Math.floor(eW/bL),rows:Math.floor(eD/bW),bX:bL,bZ:bW,lH:bH,per:Math.floor(eW/bL)*Math.floor(eD/bW)};
+  if(mode==='flat')return {...A,mixed:false};
+  if(mode==='rot')return {...B,mixed:false};
   if(mode==='mixed'){
-    let best=A.per>=B.per?{...A,mixed:false}:{...B,mixed:false};
-    let bestPer=best.per;
-    const rowsA=A.rows, rowsB=B.rows;
-    for(let ca=0;ca<=Math.floor(eW/A.bX);ca++){
-      const remW=eW-ca*A.bX;
-      const cb=Math.floor(remW/B.bX);
-      const per=ca*rowsA+cb*rowsB;
-      if(per>bestPer){
-        bestPer=per;
-        best={
-          mixed:true,per,lH:bH,
-          cA:ca,rA:rowsA,bXA:A.bX,bZA:A.bZ,
-          cB:cb,rB:rowsB,bXB:B.bX,bZB:B.bZ,
-          desc:`${ca}×${rowsA} + ${cb}×${rowsB} rot`
-        };
-      }
-    }
-    return best;
+     let best=A.per>=B.per?{...A,mixed:false}:{...B,mixed:false};
+     for(let ca=0;ca<=Math.floor(eW/bW);ca++){
+       const remW=eW-ca*bW; const cb=Math.floor(remW/bL); const p=ca*A.rows+cb*B.rows;
+       if(p>best.per) best={mixed:true,per:p,lH:bH,cA:ca,rA:A.rows,bXA:bW,bZA:bL,cB:cb,rB:B.rows,bXB:bL,bZB:bW};
+     }
+     return best;
   }
-  return{...A,mixed:false};
+  return A.per>=B.per?A:B;
 }
 
-// ── main calc
-function gv(id){const v=parseFloat(document.getElementById(id).value)||0;return unit==='cm'?v/IC:v;}
+function gv(id){return unit==='cm'?parseFloat(document.getElementById(id).value)/IC:parseFloat(document.getElementById(id).value);}
 function calc(){
-  const pW=gv('palW'),pD=gv('palD'),maxH=gv('palMaxH');
-  const bW=gv('boxW'),bL=gv('boxL'),bH=gv('boxH'),oh=gv('overhang');
-  const maxLay=parseInt(document.getElementById('maxL').value)||999;
-  const bWtI=unit==='cm'?(parseFloat(document.getElementById('boxWt').value)||0)/0.453592:(parseFloat(document.getElementById('boxWt').value)||0);
-  const pmwI=unit==='cm'?(parseFloat(document.getElementById('palMaxW').value)||0)/0.453592:(parseFloat(document.getElementById('palMaxW').value)||0);
-  if(!pW||!pD||!bW||!bL||!bH)return;
-
+  const pW=gv('palW'), pD=gv('palD'), maxH=gv('palMaxH'), bW=gv('boxW'), bL=gv('boxL'), bH=gv('boxH'), oh=gv('overhang');
   const lay=calcLayout(pW,pD,bW,bL,bH,oh,orient);
-  const ptH=ptop();
-  const maxLH=Math.max(1,Math.floor((maxH-ptH)/lay.lH));
-  const layers=Math.min(maxLay,maxLH);
-  const per=lay.mixed?lay.per:lay.per;
-  const total=per*layers;
-  const stackH=layers*lay.lH;
-  const totalH=ptH+stackH;
-  const totalWt=total*bWtI+45;
-  const eff=Math.round(Math.min(100,(total*bW*bL*bH)/(pW*pD*maxH)*100));
-
-  let ovhW=0,ovhL=0;
-  if(oh>0&&!lay.mixed){
-    ovhW=Math.max(0,(lay.cols||0)*lay.bX-pW);
-    ovhL=Math.max(0,(lay.rows||0)*lay.bZ-pD);
-  }
-
-  lastR={lay,layers,total,stackH,totalH,totalWt,eff,bWtI,pmwI,pW,pD,bW,bL,bH,oh,ovhW,ovhL,ptH};
-  const sl=document.getElementById('lrange');
-  sl.max=Math.max(layers,20);sl.value=layers;
-  document.getElementById('lv').textContent=layers;
-  updStats(lastR);draw();
+  const layers=Math.min(parseInt(document.getElementById('maxL').value), Math.floor((maxH-ptop())/lay.lH));
+  lastR={lay,layers,total:lay.per*layers,stackH:layers*lay.lH,totalH:ptop()+(layers*lay.lH),totalWt:(lay.per*layers*gv('boxWt'))+45,eff:0,pW,pD,bW,bL,bH,oh};
+  updStats(lastR); draw();
 }
 
 function updStats(r){
-  const u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
-  document.getElementById('r-tot').textContent=r.total;
-  document.getElementById('r-lay').textContent=r.layers;
-  document.getElementById('r-pl').textContent=r.lay.per;
-  document.getElementById('r-wt').textContent=dWt;
-  document.getElementById('r-eff').textContent=r.eff+'%';
-  document.getElementById('eff-f').style.width=r.eff+'%';
-
-  document.getElementById('ov-panel').style.display='block';
-  document.getElementById('ov-pl').textContent=r.lay.per;
+  const u=ul(), w=wl();
+  document.getElementById('r-tot').textContent=r.total; document.getElementById('r-lay').textContent=r.layers;
+  document.getElementById('r-pl').textContent=r.lay.per; document.getElementById('r-wt').textContent=wD(r.totalWt).toFixed(0);
+  document.getElementById('ov-panel').style.display='block'; document.getElementById('ov-pl').textContent=r.lay.per;
   document.getElementById('ov-sh').textContent=`${toD(r.stackH).toFixed(1)} ${u}`;
-  document.getElementById('ov-wt').textContent=`${dWt} ${w}`;
-  const ohr=document.getElementById('ov-oh-row');
-  if(r.oh>0){ohr.style.display='flex';document.getElementById('ov-oh').textContent=`${toD(r.oh).toFixed(1)} ${u}`;}
-  else ohr.style.display='none';
-
-  const wb=document.getElementById('w-wt');
-  if(r.bWtI>0&&r.pmwI>0&&r.totalWt>r.pmwI){
-    const ov=wD(r.totalWt-r.pmwI).toFixed(0);
-    wb.style.display='flex';document.getElementById('w-wt-t').textContent=`Exceeds capacity by ${ov} ${w}`;
-  } else wb.style.display='none';
-
-  const oi=document.getElementById('ohinfo');
-  if(r.oh>0){
-    const aW=toD(r.ovhW).toFixed(1),aL=toD(r.ovhL).toFixed(1);
-    const allowed=toD(r.oh).toFixed(1);
-    oi.style.display='block';
-    oi.innerHTML=`Overhang allowed: ±${allowed} ${u}<br>Actual overhang: ${aW} ${u} (W) × ${aL} ${u} (L)`;
-  } else oi.style.display='none';
-
-  const mixB=r.lay.mixed?`<span class="mix-badge">mixed: ${r.lay.desc}</span>`:'';
-  const layStr=r.lay.mixed?r.lay.desc:`${r.lay.cols||0} cols × ${r.lay.rows||0} rows`;
-
-  document.getElementById('dtbl').innerHTML=`
-    <tr><td>Layout${mixB}</td><td>${layStr}</td></tr>
-    <tr><td>Box W×L×H (${u})</td><td>${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)}</td></tr>
-    <tr><td>Pallet W×L (${u})</td><td>${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)}</td></tr>
-    <tr><td>Stack height (${u})</td><td>${toD(r.stackH).toFixed(1)}</td></tr>
-    <tr><td>Total height (${u})</td><td>${toD(r.totalH).toFixed(1)}</td></tr>
-    <tr><td>Total weight (${w})</td><td>${dWt}</td></tr>
-    <tr><td>Efficiency</td><td>${r.eff}%</td></tr>
-  `;
+  document.getElementById('dtbl').innerHTML=`<tr><td>Pallet Size</td><td>${toD(r.pW)}x${toD(r.pD)} in</td></tr><tr><td>Total Height</td><td>${toD(r.totalH).toFixed(1)} ${u}</td></tr>`;
 }
 
-// ── draw 3D
 function draw(){
-  if(!lastR)return;
-  const r=lastR;
-  boxGrp.clear();
-  buildPallet(r.pW,r.pD);
-
-  const op=parseFloat(document.getElementById('opRange').value)/100;
-  const tr=op<1;
-  const emAt=new THREE.LineBasicMaterial({color:0x000,transparent:true,opacity:.12});
-
-  const mats=[getFTex('right'),getFTex('left'),getFTex('top'),getFTex('bottom'),getFTex('front'),getFTex('back')]
-    .map(t=>new THREE.MeshStandardMaterial({map:t,roughness:.82,metalness:.04,transparent:tr,opacity:op}));
-
+  if(!lastR)return; const r=lastR; boxGrp.clear(); buildPallet(r.pW,r.pD);
+  const op=document.getElementById('opRange').value/100;
+  const mats=['right','left','top','bottom','front','back'].map(f=>new THREE.MeshStandardMaterial({map:getFTex(f),transparent:true,opacity:op}));
   const baseY=ptop();
-  const ly=r.lay;
-
-  function placeBox(x,y,z,bx,bh,bz){
-    const g=new THREE.BoxGeometry(bx,bh,bz);
-    const m=new THREE.Mesh(g,mats);
-    m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;
-    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bx+.04,bh+.04,bz+.04)),emAt));
-    boxGrp.add(m);
-  }
-
   for(let l=0;l<r.layers;l++){
-    const yOff=baseY+l*ly.lH+ly.lH/2;
-    if(ly.mixed){
-      const sXA=-r.pW/2;
-      for(let c=0;c<(ly.cA||0);c++){
-        const x=sXA+c*ly.bXA+ly.bXA/2;
-        const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
-        for(let row=0;row<(ly.rA||0);row++) placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA);
-      }
-      const sXB=-r.pW/2+(ly.cA||0)*ly.bXA;
-      for(let c=0;c<(ly.cB||0);c++){
-        const x=sXB+c*ly.bXB+ly.bXB/2;
-        const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
-        for(let row=0;row<(ly.rB||0);row++) placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB);
-      }
+    const yOff=baseY+l*r.lay.lH+r.lay.lH/2;
+    if(r.lay.mixed){
+      for(let c=0;c<r.lay.cA;c++) for(let row=0;row<r.lay.rA;row++) 
+        placeBox(c*r.lay.bXA+r.lay.bXA/2-r.pW/2, yOff, row*r.lay.bZA+r.lay.bZA/2-r.pD/2, r.lay.bXA, r.lay.lH, r.lay.bZA);
+      for(let c=0;c<r.lay.cB;c++) for(let row=0;row<r.lay.rB;row++)
+        placeBox(r.lay.cA*r.lay.bXA+c*r.lay.bXB+r.lay.bXB/2-r.pW/2, yOff, row*r.lay.bZB+r.lay.bZB/2-r.pD/2, r.lay.bXB, r.lay.lH, r.lay.bZB);
     } else {
-      const cols=ly.cols||0,rows=ly.rows||0;
-      const sX=-(cols*ly.bX)/2+ly.bX/2;
-      const sZ=-(rows*ly.bZ)/2+ly.bZ/2;
-      for(let c=0;c<cols;c++)
-        for(let row=0;row<rows;row++)
-          placeBox(sX+c*ly.bX,yOff,sZ+row*ly.bZ,ly.bX,ly.lH,ly.bZ);
+      const sX=-(r.lay.cols*r.lay.bX)/2+r.lay.bX/2, sZ=-(r.lay.rows*r.lay.bZ)/2+r.lay.bZ/2;
+      for(let c=0;c<r.lay.cols;c++) for(let row=0;row<r.lay.rows;row++)
+        placeBox(sX+c*r.lay.bX, yOff, sZ+row*r.lay.bZ, r.lay.bX, r.lay.lH, r.lay.bZ);
     }
   }
-
-  if(r.oh>0){
-    const om=new THREE.MeshBasicMaterial({color:0x1a6aff,transparent:true,opacity:.1,side:THREE.DoubleSide});
-    const y2=baseY+r.stackH/2, h2=r.stackH;
-    [[r.oh,h2,-(r.pW/2+r.oh/2),y2,0,0,0,0],[r.oh,h2,r.pW/2+r.oh/2,y2,0,0,0,0]].forEach(([w,hh,x,y,z])=>{
-      const m=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),om);m.position.set(x,y,z);boxGrp.add(m);
-    });
-  }
+  function placeBox(x,y,z,bx,bh,bz){ const m=new THREE.Mesh(new THREE.BoxGeometry(bx-0.05,bh-0.05,bz-0.05),mats); m.position.set(x,y,z); m.castShadow=true; boxGrp.add(m); }
 }
 
-// ── three init
 function initThree(){
-  scene=new THREE.Scene();
-  const wrap=document.getElementById('cv-wrap'),W=wrap.clientWidth,H=wrap.clientHeight;
-  cam=new THREE.PerspectiveCamera(40,W/H,.1,5000);cam.position.set(140,110,140);
+  scene=new THREE.Scene(); const wrap=document.getElementById('cv-wrap');
+  cam=new THREE.PerspectiveCamera(40,wrap.clientWidth/wrap.clientHeight,1,5000); cam.position.set(140,110,140);
   rnd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
-  rnd.setSize(W,H);rnd.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  rnd.shadowMap.enabled=true;rnd.shadowMap.type=THREE.PCFSoftShadowMap;
-  rnd.toneMapping=THREE.ACESFilmicToneMapping;rnd.toneMappingExposure=1.05;
-  wrap.appendChild(rnd.domElement);
-
+  rnd.setSize(wrap.clientWidth,wrap.clientHeight); rnd.shadowMap.enabled=true; wrap.appendChild(rnd.domElement);
   ctrl=new THREE.OrbitControls(cam,rnd.domElement);
-  ctrl.enableDamping=true;ctrl.dampingFactor=.07;
-  ctrl.maxPolarAngle=Math.PI/1.88;ctrl.minDistance=15;ctrl.maxDistance=800;
-
-  scene.add(new THREE.AmbientLight(0xffffff,.65));
-  const sun=new THREE.DirectionalLight(0xfff5e8,1.0);sun.position.set(100,180,80);sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048);
-  sun.shadow.camera.left=-180;sun.shadow.camera.right=180;sun.shadow.camera.top=180;sun.shadow.camera.bottom=-180;
-  sun.shadow.bias=-.001;scene.add(sun);
-  const fl=new THREE.DirectionalLight(0xcce8ff,.3);fl.position.set(-80,60,-80);scene.add(fl);
-
-  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),new THREE.ShadowMaterial({opacity:.1}));
-  gnd.rotation.x=-Math.PI/2;gnd.position.y=-.5;gnd.receiveShadow=true;scene.add(gnd);
-
-  boxGrp=new THREE.Group();palGrp=new THREE.Group();mainGrp=new THREE.Group();
-  mainGrp.add(palGrp);mainGrp.add(boxGrp);scene.add(mainGrp);
-
-  window.addEventListener('resize',()=>{const cW=wrap.clientWidth,cH=wrap.clientHeight;cam.aspect=cW/cH;cam.updateProjectionMatrix();rnd.setSize(cW,cH);});
+  scene.add(new THREE.AmbientLight(0xffffff,.7));
+  const sun=new THREE.DirectionalLight(0xffffff,0.8); sun.position.set(50,150,50); sun.castShadow=true; scene.add(sun);
+  boxGrp=new THREE.Group(); palGrp=new THREE.Group(); mainGrp=new THREE.Group();
+  mainGrp.add(palGrp); mainGrp.add(boxGrp); scene.add(mainGrp);
   (function loop(){requestAnimationFrame(loop);ctrl.update();rnd.render(scene,cam);})();
 }
+function setCam(t){ if(t==='iso')cam.position.set(140,110,140); if(t==='top')cam.position.set(0,250,0); if(t==='front')cam.position.set(0,50,200); ctrl.update(); }
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200);}
 
-function setCam(t){
-  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
-  document.getElementById('c-'+t).classList.add('on');
-  const box=new THREE.Box3().setFromObject(mainGrp),c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
-  const d=Math.max(s.x,s.y,s.z)*1.9;ctrl.target.copy(c);
-  if(t==='iso')cam.position.set(c.x+d*.75,c.y+d*.65,c.z+d*.75);
-  if(t==='top')cam.position.set(c.x,c.y+d*1.5,c.z+.01);
-  if(t==='front')cam.position.set(c.x,c.y+s.y*.25,c.z+d*1.3);
-  if(t==='side')cam.position.set(c.x+d*1.3,c.y+s.y*.25,c.z);
-  ctrl.update();
-}
-
-// ── export
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200);}
-
-function copyR(){
-  if(!lastR)return;
-  const r=lastR,u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
-  navigator.clipboard.writeText([
-    'PALLET LOAD CALCULATOR','─────────────────────',
-    `Total boxes:    ${r.total}`,`Layers:         ${r.layers}`,`Per layer:      ${r.lay.per}`,
-    `Stack height:   ${toD(r.stackH).toFixed(1)} ${u}`,`Total height:   ${toD(r.totalH).toFixed(1)} ${u}`,
-    `Total weight:   ${dWt} ${w}`,`Efficiency:      ${r.eff}%`,
-  ].join('\n')).then(()=>toast('Copied!'));
-}
-function exportCSV(){
-  if(!lastR)return;
-  const r=lastR,u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
-  const rows=[['Parameter','Value','Unit'],['Total boxes',r.total,''],['Layers',r.layers,''],
-    ['Per layer',r.lay.per,''],['Stack height',toD(r.stackH).toFixed(1),u],
-    ['Total height',toD(r.totalH).toFixed(1),u],['Weight',dWt,w],['Efficiency',r.eff+'%',''],
-    ['Box W×L×H',`${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)}`,u],
-    ['Pallet W×L',`${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)}`,u]];
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='pallet.csv';a.click();toast('CSV saved');
-}
-function exportPNG(){
-  rnd.setClearColor(0,0);rnd.render(scene,cam);
-  rnd.domElement.toBlob(blob=>{
-    if(navigator.clipboard&&window.ClipboardItem)navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(()=>toast('PNG copied!')).catch(()=>dlb(blob));
-    else dlb(blob);
-  });
-}
-function dlb(blob){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='pallet.png';a.click();URL.revokeObjectURL(u);toast('PNG saved');}
-
-initThree();updPP();calc();
+initThree(); calc();
 </script>
 </body>
 </html>
