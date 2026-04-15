@@ -328,16 +328,16 @@ function setUnit(u){
 function updLabels(){
   const u=ul(),w=wl();
   const lm={
-    'l-pw':Width W (${u}),'l-pd':Length L (${u}),'l-ph':Max height (${u}),'l-mw':Max weight (${w}),
-    'l-bw':W (${u}),'l-bl':L (${u}),'l-bh':H (${u}),'l-bwt':Weight/box (${w}),'l-ovh':Overhang (${u})
+    'l-pw':`Width W (${u})`,'l-pd':`Length L (${u})`,'l-ph':`Max height (${u})`,'l-mw':`Max weight (${w})`,
+    'l-bw':`W (${u})`,'l-bl':`L (${u})`,'l-bh':`H (${u})`,'l-bwt':`Weight/box (${w})`,'l-ovh':`Overhang (${u})`
   };
   Object.entries(lm).forEach(([id,t])=>{const e=document.getElementById(id);if(e)e.textContent=t;});
-  document.getElementById('wt-lbl').textContent=Weight (${w});
+  document.getElementById('wt-lbl').textContent=`Weight (${w})`;
 }
 function updPP(){
   PALS.forEach((p,i)=>{
     const e=document.getElementById('pps'+i); if(!e)return;
-    e.textContent=unit==='cm'?${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm:${p.w} × ${p.d} in;
+    e.textContent=unit==='cm'?`${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm`:`${p.w} × ${p.d} in`;
   });
 }
 function setPP(i){
@@ -345,7 +345,7 @@ function setPP(i){
   document.getElementById('palW').value=unit==='cm'?+(p.w*IC).toFixed(1):p.w;
   document.getElementById('palD').value=unit==='cm'?+(p.d*IC).toFixed(1):p.d;
   document.querySelectorAll('.pal-pre').forEach((e,j)=>e.classList.toggle('on',j===i));
-  calc();toast(Preset: ${p.n});
+  calc();toast(`Preset: ${p.n}`);
 }
 function setOrient(o){
   orient=o;
@@ -375,7 +375,7 @@ window.addEventListener('paste',e=>{
       const si=document.getElementById('fi-'+activeFace);
       si.setAttribute('href',ev.target.result);si.style.display='block';
       document.getElementById('fh-'+activeFace).classList.add('img');
-      updFClears();draw();toast(Image → ${activeFace});
+      updFClears();draw();toast(`Image → ${activeFace}`);
     };
     img.src=ev.target.result;
   };
@@ -409,37 +409,32 @@ function getFTex(face){
   ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
   for(let i=0;i<512;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,512);ctx.stroke();}
 
-if(face==='top'){
-  // одна полоска скотчу по центру
-  ctx.fillStyle = tape + 'aa'; // більше opacity
-  ctx.fillRect(230, 0, 52, 512);
-}
-
+  if(face==='top'){
+    // flap cross
+    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,256);ctx.lineTo(512,256);ctx.stroke();
+    // tape on cross
+    ctx.fillStyle=tape+'55';ctx.fillRect(238,0,36,512);ctx.fillRect(0,238,512,36);
+  } else if(face==='front'||face==='back'){
+    // horizontal tape stripe ~mid height
+    ctx.fillStyle=tape+'60';ctx.fillRect(0,215,512,42);
+    ctx.strokeStyle=tape+'88';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,215);ctx.lineTo(512,215);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,257);ctx.lineTo(512,257);ctx.stroke();
+  } else if(face==='left'||face==='right'){
+    // vertical tape
+    ctx.fillStyle=tape+'45';ctx.fillRect(228,0,56,512);
+    ctx.strokeStyle=tape+'77';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(228,0);ctx.lineTo(228,512);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(284,0);ctx.lineTo(284,512);ctx.stroke();
+  }
   // shading
   const sh=ctx.createLinearGradient(0,0,512,512);
   sh.addColorStop(0,'rgba(255,255,255,.1)');sh.addColorStop(1,'rgba(0,0,0,.1)');
   ctx.fillStyle=sh;ctx.fillRect(0,0,512,512);
 
-if(fImgData[face]){
-  const im = new Image();
-  im.src = fImgData[face];
-
-  // робимо mockup ефект
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.globalAlpha = 0.9; // регулює "вплавлення"
-
-  ctx.drawImage(im, 0, 0, 512, 512);
-
-  const grad = ctx.createLinearGradient(0,0,512,512);
-grad.addColorStop(0,'rgba(0,0,0,0.15)');
-grad.addColorStop(1,'rgba(255,255,255,0.05)');
-ctx.fillStyle = grad;
-ctx.fillRect(0,0,512,512);
-  
-  // повертаємо назад
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = 1;
-}
+  if(fImgData[face]){const im=new Image();im.src=fImgData[face];ctx.drawImage(im,0,0,512,512);}
 
   fTexCache[face]=new THREE.CanvasTexture(cv);
   return fTexCache[face];
@@ -511,7 +506,7 @@ function calcLayout(pW,pD,bW,bL,bH,oh,mode){
           mixed:true,per,lH:bH,
           cA:ca,rA:rowsA,bXA:A.bX,bZA:A.bZ,
           cB:cb,rB:rowsB,bXB:B.bX,bZB:B.bZ,
-          desc:${ca}×${rowsA} + ${cb}×${rowsB} rot
+          desc:`${ca}×${rowsA} + ${cb}×${rowsB} rot`
         };
       }
     }
@@ -567,17 +562,17 @@ function updStats(r){
   // overlay
   document.getElementById('ov-panel').style.display='block';
   document.getElementById('ov-pl').textContent=r.lay.per;
-  document.getElementById('ov-sh').textContent=${toD(r.stackH).toFixed(1)} ${u};
-  document.getElementById('ov-wt').textContent=${dWt} ${w};
+  document.getElementById('ov-sh').textContent=`${toD(r.stackH).toFixed(1)} ${u}`;
+  document.getElementById('ov-wt').textContent=`${dWt} ${w}`;
   const ohr=document.getElementById('ov-oh-row');
-  if(r.oh>0){ohr.style.display='flex';document.getElementById('ov-oh').textContent=${toD(r.oh).toFixed(1)} ${u};}
+  if(r.oh>0){ohr.style.display='flex';document.getElementById('ov-oh').textContent=`${toD(r.oh).toFixed(1)} ${u}`;}
   else ohr.style.display='none';
 
   // weight warn
   const wb=document.getElementById('w-wt');
   if(r.bWtI>0&&r.pmwI>0&&r.totalWt>r.pmwI){
     const ov=wD(r.totalWt-r.pmwI).toFixed(0);
-    wb.style.display='flex';document.getElementById('w-wt-t').textContent=Exceeds capacity by ${ov} ${w};
+    wb.style.display='flex';document.getElementById('w-wt-t').textContent=`Exceeds capacity by ${ov} ${w}`;
   } else wb.style.display='none';
 
   // overhang info
@@ -586,12 +581,12 @@ function updStats(r){
     const aW=toD(r.ovhW).toFixed(1),aL=toD(r.ovhL).toFixed(1);
     const allowed=toD(r.oh).toFixed(1);
     oi.style.display='block';
-    oi.innerHTML=Overhang allowed: ±${allowed} ${u}<br>Actual overhang: ${aW} ${u} (W) × ${aL} ${u} (L);
+    oi.innerHTML=`Overhang allowed: ±${allowed} ${u}<br>Actual overhang: ${aW} ${u} (W) × ${aL} ${u} (L)`;
   } else oi.style.display='none';
 
   // mixed badge
-  const mixB=r.lay.mixed?<span class="mix-badge">mixed: ${r.lay.desc}</span>:'';
-  const layStr=r.lay.mixed?r.lay.desc:${r.lay.cols||0} cols × ${r.lay.rows||0} rows;
+  const mixB=r.lay.mixed?`<span class="mix-badge">mixed: ${r.lay.desc}</span>`:'';
+  const layStr=r.lay.mixed?r.lay.desc:`${r.lay.cols||0} cols × ${r.lay.rows||0} rows`;
 
   document.getElementById('dtbl').innerHTML=`
     <tr><td>Layout${mixB}</td><td>${layStr}</td></tr>
@@ -717,9 +712,9 @@ function copyR(){
   const r=lastR,u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
   navigator.clipboard.writeText([
     'PALLET LOAD CALCULATOR','─────────────────────',
-    Total boxes:    ${r.total},Layers:         ${r.layers},Per layer:      ${r.lay.per},
-    Stack height:   ${toD(r.stackH).toFixed(1)} ${u},Total height:   ${toD(r.totalH).toFixed(1)} ${u},
-    Total weight:   ${dWt} ${w},Efficiency:     ${r.eff}%,
+    `Total boxes:    ${r.total}`,`Layers:         ${r.layers}`,`Per layer:      ${r.lay.per}`,
+    `Stack height:   ${toD(r.stackH).toFixed(1)} ${u}`,`Total height:   ${toD(r.totalH).toFixed(1)} ${u}`,
+    `Total weight:   ${dWt} ${w}`,`Efficiency:     ${r.eff}%`,
   ].join('\n')).then(()=>toast('Copied!'));
 }
 function exportCSV(){
@@ -728,8 +723,8 @@ function exportCSV(){
   const rows=[['Parameter','Value','Unit'],['Total boxes',r.total,''],['Layers',r.layers,''],
     ['Per layer',r.lay.per,''],['Stack height',toD(r.stackH).toFixed(1),u],
     ['Total height',toD(r.totalH).toFixed(1),u],['Weight',dWt,w],['Efficiency',r.eff+'%',''],
-    ['Box W×L×H',${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)},u],
-    ['Pallet W×L',${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)},u]];
+    ['Box W×L×H',`${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)}`,u],
+    ['Pallet W×L',`${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)}`,u]];
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='pallet.csv';a.click();toast('CSV saved');
 }
 function exportPNG(){
