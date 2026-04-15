@@ -398,45 +398,70 @@ function updFClears(){
 }
 
 function getFTex(face){
-  if(fTexCache[face])return fTexCache[face];
-  const cv=document.createElement('canvas');cv.width=512;cv.height=512;
-  const ctx=cv.getContext('2d');
-  const base=document.getElementById('boxCol').value;
-  const tape=document.getElementById('tapeCol').value;
+  if(fTexCache[face]) return fTexCache[face];
+  const cv = document.createElement('canvas');
+  cv.width = 512;
+  cv.height = 512;
+  const ctx = cv.getContext('2d');
+  const base = document.getElementById('boxCol').value;
+  const tape = document.getElementById('tapeCol').value;
 
-  ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
-  // grain
-  ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
-  for(let i=0;i<512;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,512);ctx.stroke();}
+  // 1. ФОН (Колір коробки)
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, 512, 512);
 
-  if(face==='top'){
-    // flap cross
-    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,256);ctx.lineTo(512,256);ctx.stroke();
-    // tape on cross
-    ctx.fillStyle=tape+'55';ctx.fillRect(238,0,36,512);ctx.fillRect(0,238,512,36);
-  } else if(face==='front'||face==='back'){
-    // horizontal tape stripe ~mid height
-    ctx.fillStyle=tape+'60';ctx.fillRect(0,215,512,42);
-    ctx.strokeStyle=tape+'88';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(0,215);ctx.lineTo(512,215);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,257);ctx.lineTo(512,257);ctx.stroke();
-  } else if(face==='left'||face==='right'){
-    // vertical tape
-    ctx.fillStyle=tape+'45';ctx.fillRect(228,0,56,512);
-    ctx.strokeStyle=tape+'77';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(228,0);ctx.lineTo(228,512);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(284,0);ctx.lineTo(284,512);ctx.stroke();
+  // 2. ТЕКСТУРА КАРТОНУ (Зернистість)
+  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+  ctx.lineWidth = 1;
+  for(let i = 0; i < 512; i += 4){
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 512);
+    ctx.stroke();
   }
-  // shading
-  const sh=ctx.createLinearGradient(0,0,512,512);
-  sh.addColorStop(0,'rgba(255,255,255,.1)');sh.addColorStop(1,'rgba(0,0,0,.1)');
-  ctx.fillStyle=sh;ctx.fillRect(0,0,512,512);
 
-  if(fImgData[face]){const im=new Image();im.src=fImgData[face];ctx.drawImage(im,0,0,512,512);}
+  // 3. ТЕХНІЧНІ ЕЛЕМЕНТИ (СКОТЧ ТА ЗГИНИ)
+  if(face === 'top'){
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(256,0); ctx.lineTo(256,512); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,256); ctx.lineTo(512,256); ctx.stroke();
+    ctx.fillStyle = tape + '88'; 
+    ctx.fillRect(235, 0, 42, 512); 
+    ctx.fillRect(0, 235, 512, 42);
+  } else if(face === 'front' || face === 'back'){
+    ctx.fillStyle = tape + '40';
+    ctx.fillRect(0, 215, 512, 40);
+  } else if(face === 'left' || face === 'right'){
+    ctx.fillStyle = tape + '30';
+    ctx.fillRect(230, 0, 52, 512);
+  }
 
-  fTexCache[face]=new THREE.CanvasTexture(cv);
+  // 4. НАКЛАДЕННЯ ЗОБРАЖЕННЯ (OVERLAY / MULTIPLY)
+  if(fImgData[face]){
+    const im = new Image();
+    im.src = fImgData[face];
+    
+    // Зберігаємо стан контексту
+    ctx.save();
+    // Використовуємо multiply для ефекту друку на картоні
+    ctx.globalCompositeOperation = 'multiply';
+    
+    // Якщо хочете, щоб картинка була трохи прозорішою:
+    ctx.globalAlpha = 0.95; 
+    
+    ctx.drawImage(im, 0, 0, 512, 512);
+    ctx.restore();
+  }
+
+  // 5. ФІНАЛЬНЕ ЗАТІНЕННЯ (ОБ'ЄМ)
+  const sh = ctx.createRadialGradient(256, 256, 100, 256, 256, 400);
+  sh.addColorStop(0, 'rgba(255,255,255,0.05)');
+  sh.addColorStop(1, 'rgba(0,0,0,0.15)');
+  ctx.fillStyle = sh;
+  ctx.fillRect(0, 0, 512, 512);
+
+  fTexCache[face] = new THREE.CanvasTexture(cv);
   return fTexCache[face];
 }
 
