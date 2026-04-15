@@ -134,6 +134,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
+  <!-- PALLET -->
   <div class="sec">
     <div class="st">Pallet</div>
     <div class="pal-grid">
@@ -150,6 +151,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
+  <!-- BOX -->
   <div class="sec">
     <div class="st">Box dimensions — W × L × H</div>
     <div class="g3">
@@ -163,6 +165,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
+  <!-- STACKING -->
   <div class="sec">
     <div class="st">Stacking</div>
     <div class="f" style="margin-bottom:7px">
@@ -183,6 +186,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
+  <!-- BOX DESIGN -->
   <div class="sec">
     <div class="st">Box design</div>
     <div class="g2" style="margin-bottom:7px">
@@ -194,43 +198,51 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
       <input type="range" id="opRange" min="20" max="100" value="95" step="1" oninput="opslide(this)">
     </div>
     <div class="face-hint">Click a face → paste image (Cmd/Ctrl+V)</div>
+    <!-- Face diagram SVG - unfolded cross layout -->
     <div class="face-svg-wrap">
       <svg id="fsvg" viewBox="0 0 270 190" xmlns="http://www.w3.org/2000/svg">
+        <!-- TOP (W×L) -->
         <g class="fh" id="fh-top" onclick="setFace('top')">
           <rect x="80" y="5" width="80" height="50" fill="#e8dfc8" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-top" x="80" y="5" width="80" height="50" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="120" y="27" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">TOP</text>
           <text x="120" y="39" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">W × L</text>
         </g>
+        <!-- FRONT (W×H) — main -->
         <g class="fh on" id="fh-front" onclick="setFace('front')">
           <rect x="80" y="58" width="80" height="60" fill="#f0e6cc" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-front" x="80" y="58" width="80" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="120" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">FRONT</text>
           <text x="120" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">W × H</text>
         </g>
+        <!-- BOTTOM (W×L) -->
         <g class="fh" id="fh-bottom" onclick="setFace('bottom')">
           <rect x="80" y="121" width="80" height="50" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-bottom" x="80" y="121" width="80" height="50" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="120" y="150" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">BOTTOM</text>
         </g>
+        <!-- LEFT (L×H) -->
         <g class="fh" id="fh-left" onclick="setFace('left')">
           <rect x="14" y="58" width="62" height="60" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-left" x="14" y="58" width="62" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="45" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">LEFT</text>
           <text x="45" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">L × H</text>
         </g>
+        <!-- RIGHT (L×H) -->
         <g class="fh" id="fh-right" onclick="setFace('right')">
           <rect x="164" y="58" width="62" height="60" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-right" x="164" y="58" width="62" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="195" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">RIGHT</text>
           <text x="195" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">L × H</text>
         </g>
+        <!-- BACK (W×H) -->
         <g class="fh" id="fh-back" onclick="setFace('back')">
           <rect x="230" y="58" width="34" height="60" fill="#e8dfc8" stroke="#c8b898" stroke-width="1" rx="1"/>
           <image id="fi-back" x="230" y="58" width="34" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
           <text x="247" y="86" text-anchor="middle" font-size="8" fill="#888" font-family="sans-serif" font-weight="700">BACK</text>
           <text x="247" y="96" text-anchor="middle" font-size="7" fill="#aaa" font-family="sans-serif">W×H</text>
         </g>
+        <!-- dim arrows -->
         <text x="119" y="3" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif">← W →</text>
         <text x="10" y="91" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif" transform="rotate(-90,10,91)">H</text>
         <text x="268" y="91" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif">L</text>
@@ -239,6 +251,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     <div class="face-clears" id="fclears"></div>
   </div>
 
+  <!-- STATS -->
   <div class="st-panel">
     <div class="st-grid">
       <div class="sc hi"><div class="sv" id="r-tot">—</div><div class="sl">Total boxes</div></div>
@@ -264,6 +277,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
   </div>
 </div>
 
+<!-- 3D -->
 <div id="cv-wrap">
   <div class="cam-row">
     <button class="cb on" id="c-iso" onclick="setCam('iso')">3/4 ISO</button>
@@ -314,16 +328,16 @@ function setUnit(u){
 function updLabels(){
   const u=ul(),w=wl();
   const lm={
-    'l-pw':`Width W (${u})`,'l-pd':`Length L (${u})`,'l-ph':`Max height (${u})`,'l-mw':`Max weight (${w})`,
-    'l-bw':`W (${u})`,'l-bl':`L (${u})`,'l-bh':`H (${u})`,'l-bwt':`Weight/box (${w})`,'l-ovh':`Overhang (${u})`
+    'l-pw':Width W (${u}),'l-pd':Length L (${u}),'l-ph':Max height (${u}),'l-mw':Max weight (${w}),
+    'l-bw':W (${u}),'l-bl':L (${u}),'l-bh':H (${u}),'l-bwt':Weight/box (${w}),'l-ovh':Overhang (${u})
   };
   Object.entries(lm).forEach(([id,t])=>{const e=document.getElementById(id);if(e)e.textContent=t;});
-  document.getElementById('wt-lbl').textContent=`Weight (${w})`;
+  document.getElementById('wt-lbl').textContent=Weight (${w});
 }
 function updPP(){
   PALS.forEach((p,i)=>{
     const e=document.getElementById('pps'+i); if(!e)return;
-    e.textContent=unit==='cm'?`${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm`:`${p.w} × ${p.d} in`;
+    e.textContent=unit==='cm'?${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm:${p.w} × ${p.d} in;
   });
 }
 function setPP(i){
@@ -331,7 +345,7 @@ function setPP(i){
   document.getElementById('palW').value=unit==='cm'?+(p.w*IC).toFixed(1):p.w;
   document.getElementById('palD').value=unit==='cm'?+(p.d*IC).toFixed(1):p.d;
   document.querySelectorAll('.pal-pre').forEach((e,j)=>e.classList.toggle('on',j===i));
-  calc();toast(`Preset: ${p.n}`);
+  calc();toast(Preset: ${p.n});
 }
 function setOrient(o){
   orient=o;
@@ -361,7 +375,7 @@ window.addEventListener('paste',e=>{
       const si=document.getElementById('fi-'+activeFace);
       si.setAttribute('href',ev.target.result);si.style.display='block';
       document.getElementById('fh-'+activeFace).classList.add('img');
-      updFClears();draw();toast(`Image → ${activeFace}`);
+      updFClears();draw();toast(Image → ${activeFace});
     };
     img.src=ev.target.result;
   };
@@ -395,29 +409,37 @@ function getFTex(face){
   ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
   for(let i=0;i<512;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,512);ctx.stroke();}
 
-  if(face==='top'){
-    // flap cross
-    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,256);ctx.lineTo(512,256);ctx.stroke();
-    // tape on cross
-    ctx.fillStyle=tape+'88'; // Посилено насиченість для видимості
-    ctx.fillRect(238,0,36,512);ctx.fillRect(0,238,512,36);
-  }
+if(face==='top'){
+  // одна полоска скотчу по центру
+  ctx.fillStyle = tape + 'aa'; // більше opacity
+  ctx.fillRect(230, 0, 52, 512);
+}
 
   // shading
   const sh=ctx.createLinearGradient(0,0,512,512);
   sh.addColorStop(0,'rgba(255,255,255,.1)');sh.addColorStop(1,'rgba(0,0,0,.1)');
   ctx.fillStyle=sh;ctx.fillRect(0,0,512,512);
 
-  if(fImgData[face]){
-    const im=new Image();
-    im.src=fImgData[face];
-    ctx.save();
-    ctx.globalCompositeOperation = 'multiply';
-    ctx.drawImage(im,0,0,512,512);
-    ctx.restore();
-  }
+if(fImgData[face]){
+  const im = new Image();
+  im.src = fImgData[face];
+
+  // робимо mockup ефект
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.globalAlpha = 0.9; // регулює "вплавлення"
+
+  ctx.drawImage(im, 0, 0, 512, 512);
+
+  const grad = ctx.createLinearGradient(0,0,512,512);
+grad.addColorStop(0,'rgba(0,0,0,0.15)');
+grad.addColorStop(1,'rgba(255,255,255,0.05)');
+ctx.fillStyle = grad;
+ctx.fillRect(0,0,512,512);
+  
+  // повертаємо назад
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+}
 
   fTexCache[face]=new THREE.CanvasTexture(cv);
   return fTexCache[face];
@@ -475,6 +497,7 @@ function calcLayout(pW,pD,bW,bL,bH,oh,mode){
   if(mode==='auto'){const best=[A,B,C].reduce((a,b)=>b.per>a.per?b:a);return{...best,mixed:false};}
 
   if(mode==='mixed'){
+    // try combining A-columns + B-columns (same layH=bH, so only mix flat+rotated)
     let best=A.per>=B.per?{...A,mixed:false}:{...B,mixed:false};
     let bestPer=best.per;
     const rowsA=A.rows, rowsB=B.rows;
@@ -488,7 +511,7 @@ function calcLayout(pW,pD,bW,bL,bH,oh,mode){
           mixed:true,per,lH:bH,
           cA:ca,rA:rowsA,bXA:A.bX,bZA:A.bZ,
           cB:cb,rB:rowsB,bXB:B.bX,bZB:B.bZ,
-          desc:`${ca}×${rowsA} + ${cb}×${rowsB} rot`
+          desc:${ca}×${rowsA} + ${cb}×${rowsB} rot
         };
       }
     }
@@ -518,6 +541,7 @@ function calc(){
   const totalWt=total*bWtI+45;
   const eff=Math.round(Math.min(100,(total*bW*bL*bH)/(pW*pD*maxH)*100));
 
+  // overhang actual
   let ovhW=0,ovhL=0;
   if(oh>0&&!lay.mixed){
     ovhW=Math.max(0,(lay.cols||0)*lay.bX-pW);
@@ -532,38 +556,42 @@ function calc(){
 }
 
 function updStats(r){
-  const u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
+  const u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0),dH=toD(r.totalH).toFixed(1);
   document.getElementById('r-tot').textContent=r.total;
   document.getElementById('r-lay').textContent=r.layers;
-  document.getElementById('r-pl').textContent=r.lay.per;
+  document.getElementById('r-pl').textContent=r.lay.per||r.lay.per;
   document.getElementById('r-wt').textContent=dWt;
   document.getElementById('r-eff').textContent=r.eff+'%';
   document.getElementById('eff-f').style.width=r.eff+'%';
 
+  // overlay
   document.getElementById('ov-panel').style.display='block';
   document.getElementById('ov-pl').textContent=r.lay.per;
-  document.getElementById('ov-sh').textContent=`${toD(r.stackH).toFixed(1)} ${u}`;
-  document.getElementById('ov-wt').textContent=`${dWt} ${w}`;
+  document.getElementById('ov-sh').textContent=${toD(r.stackH).toFixed(1)} ${u};
+  document.getElementById('ov-wt').textContent=${dWt} ${w};
   const ohr=document.getElementById('ov-oh-row');
-  if(r.oh>0){ohr.style.display='flex';document.getElementById('ov-oh').textContent=`${toD(r.oh).toFixed(1)} ${u}`;}
+  if(r.oh>0){ohr.style.display='flex';document.getElementById('ov-oh').textContent=${toD(r.oh).toFixed(1)} ${u};}
   else ohr.style.display='none';
 
+  // weight warn
   const wb=document.getElementById('w-wt');
   if(r.bWtI>0&&r.pmwI>0&&r.totalWt>r.pmwI){
     const ov=wD(r.totalWt-r.pmwI).toFixed(0);
-    wb.style.display='flex';document.getElementById('w-wt-t').textContent=`Exceeds capacity by ${ov} ${w}`;
+    wb.style.display='flex';document.getElementById('w-wt-t').textContent=Exceeds capacity by ${ov} ${w};
   } else wb.style.display='none';
 
+  // overhang info
   const oi=document.getElementById('ohinfo');
   if(r.oh>0){
     const aW=toD(r.ovhW).toFixed(1),aL=toD(r.ovhL).toFixed(1);
     const allowed=toD(r.oh).toFixed(1);
     oi.style.display='block';
-    oi.innerHTML=`Overhang allowed: ±${allowed} ${u}<br>Actual overhang: ${aW} ${u} (W) × ${aL} ${u} (L)`;
+    oi.innerHTML=Overhang allowed: ±${allowed} ${u}<br>Actual overhang: ${aW} ${u} (W) × ${aL} ${u} (L);
   } else oi.style.display='none';
 
-  const mixB=r.lay.mixed?`<span class="mix-badge">mixed: ${r.lay.desc}</span>`:'';
-  const layStr=r.lay.mixed?r.lay.desc:`${r.lay.cols||0} cols × ${r.lay.rows||0} rows`;
+  // mixed badge
+  const mixB=r.lay.mixed?<span class="mix-badge">mixed: ${r.lay.desc}</span>:'';
+  const layStr=r.lay.mixed?r.lay.desc:${r.lay.cols||0} cols × ${r.lay.rows||0} rows;
 
   document.getElementById('dtbl').innerHTML=`
     <tr><td>Layout${mixB}</td><td>${layStr}</td></tr>
@@ -587,6 +615,7 @@ function draw(){
   const tr=op<1;
   const emAt=new THREE.LineBasicMaterial({color:0x000,transparent:true,opacity:.12});
 
+  // THREE face order: +X right, -X left, +Y top, -Y bottom, +Z front, -Z back
   const mats=[getFTex('right'),getFTex('left'),getFTex('top'),getFTex('bottom'),getFTex('front'),getFTex('back')]
     .map(t=>new THREE.MeshStandardMaterial({map:t,roughness:.82,metalness:.04,transparent:tr,opacity:op}));
 
@@ -626,6 +655,7 @@ function draw(){
     }
   }
 
+  // overhang guides
   if(r.oh>0){
     const om=new THREE.MeshBasicMaterial({color:0x1a6aff,transparent:true,opacity:.1,side:THREE.DoubleSide});
     const y2=baseY+r.stackH/2, h2=r.stackH;
@@ -687,9 +717,9 @@ function copyR(){
   const r=lastR,u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
   navigator.clipboard.writeText([
     'PALLET LOAD CALCULATOR','─────────────────────',
-    `Total boxes:    ${r.total}`,`Layers:         ${r.layers}`,`Per layer:      ${r.lay.per}`,
-    `Stack height:   ${toD(r.stackH).toFixed(1)} ${u}`,`Total height:   ${toD(r.totalH).toFixed(1)} ${u}`,
-    `Total weight:   ${dWt} ${w}`,`Efficiency:      ${r.eff}%`,
+    Total boxes:    ${r.total},Layers:         ${r.layers},Per layer:      ${r.lay.per},
+    Stack height:   ${toD(r.stackH).toFixed(1)} ${u},Total height:   ${toD(r.totalH).toFixed(1)} ${u},
+    Total weight:   ${dWt} ${w},Efficiency:     ${r.eff}%,
   ].join('\n')).then(()=>toast('Copied!'));
 }
 function exportCSV(){
@@ -698,8 +728,8 @@ function exportCSV(){
   const rows=[['Parameter','Value','Unit'],['Total boxes',r.total,''],['Layers',r.layers,''],
     ['Per layer',r.lay.per,''],['Stack height',toD(r.stackH).toFixed(1),u],
     ['Total height',toD(r.totalH).toFixed(1),u],['Weight',dWt,w],['Efficiency',r.eff+'%',''],
-    ['Box W×L×H',`${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)}`,u],
-    ['Pallet W×L',`${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)}`,u]];
+    ['Box W×L×H',${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)},u],
+    ['Pallet W×L',${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)},u]];
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='pallet.csv';a.click();toast('CSV saved');
 }
 function exportPNG(){
