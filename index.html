@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Forjars Pallet Master Pro (Transparent Copy)</title>
+    <title>Forjars Pallet Pro Studio</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #f0f2f5; font-family: -apple-system, sans-serif; display: flex; }
         #ui-sidebar {
@@ -22,13 +22,20 @@
         }
         .upload-box.active { border-color: #2ecc71; background: #e8f5e9; }
 
+        .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .preset-btn { 
+            padding: 8px; font-size: 11px; background: #eee; border: none; border-radius: 4px; 
+            cursor: pointer; transition: 0.2s; font-weight: 600;
+        }
+        .preset-btn:hover { background: #ddd; }
+
         #stats { background: #1a1a1a; color: #fff; padding: 15px; border-radius: 10px; margin-top: 15px; }
         #stats div { margin-bottom: 5px; font-size: 13px; display: flex; justify-content: space-between; }
         #stats span { font-weight: bold; color: #4ade80; }
 
-        button {
-            width: 100%; padding: 12px; background: #000; color: #fff; border: none;
-            border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;
+        .main-btn {
+            width: 100%; padding: 15px; background: #000; color: #fff; border: none;
+            border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 14px;
         }
         #canvas-container { flex-grow: 1; height: 100vh; background: radial-gradient(circle, #ffffff 0%, #dcdcdc 100%); }
     </style>
@@ -39,32 +46,37 @@
 
 <div id="ui-sidebar">
     <div class="section">
-        <h3>📦 Коробка & Палета (in)</h3>
-        <div class="grid-inputs">
-            <div><label>Кор. L</label><input type="number" id="boxL" value="12"></div>
-            <div><label>Кор. W</label><input type="number" id="boxW" value="10"></div>
-            <div><label>Кор. H</label><input type="number" id="boxH" value="8"></div>
-            <div><label>Кор. Вага</label><input type="number" id="boxWeight" value="20"></div>
-            <div><label>Пал. L</label><input type="number" id="palL" value="48"></div>
-            <div><label>Пал. W</label><input type="number" id="palW" value="40"></div>
+        <h3>🎥 Вигляд (Presets)</h3>
+        <div class="preset-grid">
+            <button class="preset-btn" onclick="setCamera('iso')">Ізометрія (3/4)</button>
+            <button class="preset-btn" onclick="setCamera('top')">Зверху</button>
+            <button class="preset-btn" onclick="setCamera('front')">Спереду</button>
+            <button class="preset-btn" onclick="setCamera('side')">Збоку</button>
         </div>
     </div>
 
     <div class="section">
-        <h3>🏗️ Керування Укладкою</h3>
-        <label>Тип розміщення</label>
+        <h3>📦 Розміри (in)</h3>
+        <div class="grid-inputs">
+            <div><label>Кор. L</label><input type="number" id="boxL" value="12"></div>
+            <div><label>Кор. W</label><input type="number" id="boxW" value="10"></div>
+            <div><label>Кор. H</label><input type="number" id="boxH" value="8"></div>
+            <div><label>Пал. L</label><input type="number" id="palL" value="48"></div>
+            <div><label>Пал. W</label><input type="number" id="palW" value="40"></div>
+            <div><label>Вага кор.</label><input type="number" id="boxWeight" value="20"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🏗️ Укладка</h3>
         <select id="stackType">
-            <option value="auto">Авто (Найбільша кількість)</option>
+            <option value="auto">Авто-вибір</option>
             <option value="long">Подовжньо</option>
             <option value="cross">Поперечно</option>
         </select>
         <div style="margin-top:10px;">
-            <label>Кількість шарів: <span id="layerVal">5</span></label>
-            <input type="range" id="layerRange" min="1" max="20" value="5">
-        </div>
-        <div style="margin-top:10px;">
-            <label>Зазор між кор. (in)</label>
-            <input type="number" id="gap" value="0.1" step="0.1">
+            <label>Шари: <span id="layerVal">5</span></label>
+            <input type="range" id="layerRange" min="1" max="25" value="5">
         </div>
     </div>
 
@@ -80,13 +92,12 @@
     </div>
 
     <div id="stats">
-        <div>Використано площі: <span id="stat_area">0%</span></div>
-        <div>Всього коробок: <span id="stat_total">0</span></div>
-        <div>Загальна вага: <span id="stat_weight">0</span> lb</div>
-        <div>Висота з пал.: <span id="stat_height">0</span> in</div>
+        <div>Коробок: <span id="stat_total">0</span></div>
+        <div>Вага: <span id="stat_weight">0</span> lb</div>
+        <div>Висота: <span id="stat_height">0</span> in</div>
     </div>
 
-    <button id="copyBtn">📸 Копіювати Об'єкт (Прозорий)</button>
+    <button class="main-btn" id="copyBtn">📸 Копіювати PNG (Прозорий)</button>
 </div>
 
 <div id="canvas-container"></div>
@@ -98,31 +109,43 @@
 
     function init() {
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 360) / window.innerHeight, 0.1, 2000);
-        camera.position.set(100, 120, 150);
+        camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 360) / window.innerHeight, 1, 3000);
+        camera.position.set(120, 120, 120);
 
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         renderer.setSize(window.innerWidth - 360, window.innerHeight);
-        // renderer.setClearColor(0x000000, 0); // Прозорий фон за замовчуванням
         renderer.shadowMap.enabled = true;
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; 
-        controls.dampingFactor = 0.05;
-        controls.maxPolarAngle = Math.PI / 1.9; // Майже горизонтально, але не під підлогу
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 1.9;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-        const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-        sun.position.set(100, 200, 100);
-        sun.castShadow = true;
-        scene.add(sun);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const light = new THREE.DirectionalLight(0xffffff, 0.4);
+        light.position.set(100, 200, 100);
+        scene.add(light);
 
         mainGroup.add(palletGroup); mainGroup.add(boxesGroup);
         scene.add(mainGroup);
         
         setupInputs();
         update();
+    }
+
+    function setCamera(type) {
+        const box = new THREE.Box3().setFromObject(mainGroup);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const dist = Math.max(size.x, size.y, size.z) * 1.5;
+
+        controls.target.copy(center);
+        if(type === 'iso') camera.position.set(center.x + dist, center.y + dist, center.z + dist);
+        if(type === 'top') camera.position.set(center.x, center.y + dist * 1.5, center.z);
+        if(type === 'front') camera.position.set(center.x, center.y, center.z + dist * 1.8);
+        if(type === 'side') camera.position.set(center.x + dist * 1.8, center.y, center.z);
+        
+        controls.update();
     }
 
     function setActiveSide(side) {
@@ -144,7 +167,7 @@
             reader.readAsDataURL(item.getAsFile());
         });
 
-        ['boxL','boxW','boxH','palL','palW','stackType','layerRange','gap'].forEach(id => {
+        ['boxL','boxW','boxH','palL','palW','stackType','layerRange'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => {
                 if(id === 'layerRange') document.getElementById('layerVal').innerText = document.getElementById(id).value;
                 update();
@@ -163,96 +186,71 @@
         return new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.7 });
     }
 
-    function update() {
-        boxesGroup.clear(); palletGroup.clear();
+    function buildRealPallet(pL, pW) {
+        palletGroup.clear();
+        const woodMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.9 });
         
+        // 1. Нижні дошки (3 шт)
+        for(let i=0; i<3; i++) {
+            const board = new THREE.Mesh(new THREE.BoxGeometry(pL, 0.8, 4), woodMat);
+            board.position.set(0, 0.4, (i-1)*(pW/2-2));
+            palletGroup.add(board);
+        }
+        // 2. Бруси (3 шт)
+        for(let i=0; i<3; i++) {
+            const block = new THREE.Mesh(new THREE.BoxGeometry(4, 3.5, pW), woodMat);
+            block.position.set((i-1)*(pL/2-2), 2.5, 0);
+            palletGroup.add(block);
+        }
+        // 3. Верхні дошки (5 шт)
+        for(let i=0; i<5; i++) {
+            const board = new THREE.Mesh(new THREE.BoxGeometry(pL, 0.8, 5), woodMat);
+            board.position.set(0, 4.6, (i-2)*(pW/4.5));
+            palletGroup.add(board);
+        }
+    }
+
+    function update() {
+        boxesGroup.clear();
         const bL = parseFloat(document.getElementById('boxL').value), bW = parseFloat(document.getElementById('boxW').value), bH = parseFloat(document.getElementById('boxH').value);
         const pL = parseFloat(document.getElementById('palL').value), pW = parseFloat(document.getElementById('palW').value);
         const layers = parseInt(document.getElementById('layerRange').value);
-        const gap = parseFloat(document.getElementById('gap').value);
         const mode = document.getElementById('stackType').value;
 
-        // Палета
-        const palGeo = new THREE.BoxGeometry(pL, 5, pW);
-        const palMesh = new THREE.Mesh(palGeo, new THREE.MeshLambertMaterial({color: 0x7a5230}));
-        palMesh.position.y = 2.5; palMesh.castShadow = true; palMesh.receiveShadow = true;
-        palletGroup.add(palMesh);
+        buildRealPallet(pL, pW);
 
-        // Розрахунок
-        let best = {c: Math.floor(pL/(bL+gap)), r: Math.floor(pW/(bW+gap)), l: bL, w: bW};
-        let alt = {c: Math.floor(pL/(bW+gap)), r: Math.floor(pW/(bL+gap)), l: bW, w: bL};
-        
-        let selected = best;
-        if(mode === 'auto') selected = (best.c*best.r >= alt.c*alt.r) ? best : alt;
-        else if(mode === 'cross') selected = alt;
+        let best = {c: Math.floor(pL/bL), r: Math.floor(pW/bW), l: bL, w: bW};
+        let alt = {c: Math.floor(pL/bW), r: Math.floor(pW/bL), l: bW, w: bL};
+        let sel = (mode === 'auto') ? (best.c*best.r >= alt.c*alt.r ? best : alt) : (mode === 'long' ? best : alt);
 
         const mats = [getMat('right'), getMat('left'), getMat('top'), new THREE.MeshStandardMaterial({color: 0xC19A6B}), getMat('front'), getMat('back')];
-        const geo = new THREE.BoxGeometry(selected.l, bH, selected.w);
+        const geo = new THREE.BoxGeometry(sel.l, bH, sel.w);
 
         for(let l=0; l<layers; l++) {
-            for(let c=0; c<selected.c; c++) {
-                for(let r=0; r<selected.r; r++) {
+            for(let c=0; c<sel.c; c++) {
+                for(let r=0; r<sel.r; r++) {
                     const box = new THREE.Mesh(geo, mats);
-                    box.position.set((c*(selected.l+gap))-(pL/2)+(selected.l/2), 5+(l*bH)+(bH/2), (r*(selected.w+gap))-(pW/2)+(selected.w/2));
-                    box.castShadow = true; box.receiveShadow = true;
-                    boxesGroup.add(box);
+                    box.position.set((c*sel.l)-(pL/2)+(sel.l/2), 5.5+(l*bH)+(bH/2), (r*sel.w)-(pW/2)+(sel.w/2));
+                    const edge = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({color:0x000, opacity:0.1, transparent:true}));
+                    box.add(edge); boxesGroup.add(box);
                 }
             }
         }
 
-        // Стати
-        const total = selected.c * selected.r * layers;
+        const total = sel.c * sel.r * layers;
         document.getElementById('stat_total').innerText = total;
-        document.getElementById('stat_weight').innerText = (total * parseFloat(document.getElementById('boxWeight').value) + 40).toFixed(0);
+        document.getElementById('stat_weight').innerText = (total * parseFloat(document.getElementById('boxWeight').value) + 45).toFixed(0);
         document.getElementById('stat_height').innerText = (5 + layers * bH).toFixed(1);
-        document.getElementById('stat_area').innerText = (((selected.c*selected.r*selected.l*selected.w)/(pL*pW))*100).toFixed(0) + "%";
     }
 
-    // Логіка КУПІЮВАННЯ ОБ'ЄКТА З ПРОЗОРИМ ФОНОМ
-    function copySceneOnly() {
-        // 1. Зберігаємо поточний стан камери та контролів
-        const originalPosition = camera.position.clone();
-        const originalTarget = controls.target.clone();
-
-        // 2. Обчислюємо обмежувальну коробку (Bounding Box) всього вантажу
-        const box = new THREE.Box3().setFromObject(mainGroup);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-
-        // 3. Тимчасово фокусуємо камеру на центрі об'єкта
-        controls.target.copy(center);
-        
-        // 4. Авто-масштабування (fit to screen)
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const fov = camera.fov * (Math.PI / 180);
-        let cameraZ = Math.abs(maxDim / 2 * Math.tan(fov * 2)); // Приблизний розрахунок дистанції
-
-        // Зміщуємо камеру, щоб об'єкт зайняв весь кадр
-        camera.position.set(center.x + cameraZ/1.5, center.y + cameraZ/2, center.z + cameraZ/1.5);
-        camera.lookAt(center);
-        controls.update();
-
-        // 5. Примусовий рендер з прозорим фоном
-        renderer.setClearColor(0x000000, 0); // Гарантуємо альфа=0
+    document.getElementById('copyBtn').addEventListener('click', () => {
+        renderer.setClearColor(0x000000, 0);
         renderer.render(scene, camera);
-
-        // 6. Копіювання в буфер
         renderer.domElement.toBlob(blob => {
             navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
-            
-            // 7. Відновлюємо попередній стан камери, щоб користувач не помітив стрибка
-            camera.position.copy(originalPosition);
-            controls.target.copy(originalTarget);
-            controls.update();
-            
-            // Повертаємо дефолтний фон (якщо він був не прозорий)
-            // renderer.setClearColor(0x000000, 0); 
-
-            alert("Прозорий об'єкт (палета+коробки) скопійовано!");
-        }, 'image/png');
-    }
-
-    document.getElementById('copyBtn').addEventListener('click', copySceneOnly);
+            alert("Зображення (прозоре) в буфері!");
+        });
+    });
 
     init();
     function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
