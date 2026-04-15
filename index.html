@@ -5,1069 +5,738 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pallet Load Calculator Pro</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252d40;
-    --border:#2a3349;--border2:#3a4560;
-    --text:#e8eaf0;--text2:#8892a4;--text3:#5a6478;
-    --accent:#00d4aa;--accent2:#00b894;--accent3:#009d7f;
-    --warn:#f59e0b;--danger:#ef4444;
-    --wood1:#8b6914;--wood2:#6b4f0e;--wood3:#a07820;
-    --radius:10px;--radius-sm:6px;
-    font-size:13px;
-  }
-  body{display:flex;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#ededed;--bg4:#e4e4e4;
+  --border:#d6d6d6;--border2:#b8b8b8;
+  --text:#1a1a1a;--text2:#555;--text3:#999;
+  --accent:#d4161a;--accent2:#b01215;
+  --accent-bg:#fff0f0;--accent-bdr:#f9c0c1;
+  --warn-bg:#fffbe6;--warn-bdr:#f0c040;--warn-txt:#7a5a00;
+  --info-bg:#eef5ff;--info-bdr:#b8d0f0;--info-txt:#1a4a7a;
+  --r:4px;
+}
+body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:13px}
 
-  /* SIDEBAR */
-  #sidebar{
-    width:320px;min-width:320px;height:100vh;overflow-y:auto;
-    background:var(--bg2);border-right:1px solid var(--border);
-    padding:0;display:flex;flex-direction:column;z-index:10
-  }
-  #sidebar::-webkit-scrollbar{width:4px}
-  #sidebar::-webkit-scrollbar-track{background:transparent}
-  #sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+#sidebar{width:308px;min-width:308px;height:100vh;overflow-y:auto;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border2)}
 
-  .sidebar-header{
-    padding:18px 20px 14px;border-bottom:1px solid var(--border);
-    background:var(--bg);position:sticky;top:0;z-index:5
-  }
-  .sidebar-header h1{font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.3px}
-  .sidebar-header p{font-size:11px;color:var(--text2);margin-top:3px}
+.sid-head{padding:13px 15px 10px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:5}
+.sid-head h1{font-size:14px;font-weight:800;letter-spacing:-.3px}
+.sid-head p{font-size:11px;color:var(--text3);margin-top:2px}
+.unit-bar{display:flex;margin:9px 0 0;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden}
+.unit-bar button{flex:1;height:27px;border:none;border-right:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;font-weight:800;cursor:pointer;transition:all .12s;letter-spacing:.5px}
+.unit-bar button:last-child{border-right:none}
+.unit-bar button.on{background:var(--accent);color:#fff}
 
-  .unit-bar{display:flex;margin:14px 20px 0;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;border:1px solid var(--border)}
-  .unit-bar button{flex:1;height:28px;border:none;background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;border-radius:4px;transition:all .15s;letter-spacing:.3px}
-  .unit-bar button.active{background:var(--accent);color:#000;font-weight:700}
+.sec{padding:11px 15px;border-bottom:1px solid var(--border)}
+.st{font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:9px}
 
-  .section{padding:14px 20px;border-bottom:1px solid var(--border)}
-  .section-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-  .section-title svg{opacity:.6}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.f{display:flex;flex-direction:column;gap:3px}
+.f label{font-size:10px;font-weight:600;color:var(--text3)}
+.f input[type=number],.f select{height:31px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);padding:0 8px;font-size:12px;font-family:inherit;outline:none;transition:border .12s;-moz-appearance:textfield}
+.f input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.f input[type=number]:focus,.f select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(212,22,26,.09)}
+.f select{cursor:pointer}
+.f input[type=color]{height:31px;width:100%;border:1px solid var(--border2);border-radius:var(--r);padding:2px 4px;cursor:pointer;background:var(--bg);outline:none}
+.f input[type=range]{width:100%;height:3px;-webkit-appearance:none;appearance:none;background:var(--border2);border-radius:2px;outline:none;margin-top:9px;cursor:pointer}
+.f input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:2px;background:var(--accent);cursor:pointer}
 
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.pal-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:9px}
+.pal-pre{padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;transition:all .12s}
+.pal-pre:hover,.pal-pre.on{border-color:var(--accent);background:var(--accent-bg)}
+.pal-pre .pn{font-size:11px;font-weight:700;color:var(--text)}
+.pal-pre .ps{font-size:10px;color:var(--text3);margin-top:1px}
 
-  .field{display:flex;flex-direction:column;gap:4px}
-  .field label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.3px;text-transform:uppercase}
-  .field input[type=number],.field select{
-    height:34px;border:1px solid var(--border2);border-radius:var(--radius-sm);
-    background:var(--bg3);color:var(--text);padding:0 10px;
-    font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;
-    -moz-appearance:textfield
-  }
-  .field input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-  .field input[type=number]:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,170,.12)}
-  .field select{cursor:pointer}
-  .field input[type=color]{
-    height:34px;width:100%;border:1px solid var(--border2);border-radius:var(--radius-sm);
-    background:var(--bg3);padding:3px 6px;cursor:pointer;outline:none
-  }
-  .field input[type=range]{
-    width:100%;height:4px;-webkit-appearance:none;appearance:none;
-    background:var(--border2);border-radius:2px;outline:none;margin-top:8px;cursor:pointer
-  }
-  .field input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
-    background:var(--accent);border:2px solid #000;cursor:pointer
-  }
+.ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:3px}
+.ob{height:27px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;transition:all .12s}
+.ob:hover{background:var(--bg3)}
+.ob.on{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);font-weight:800}
 
-  .orient-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
-  .orient-btn{
-    height:30px;border:1px solid var(--border2);border-radius:var(--radius-sm);
-    background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;
-    cursor:pointer;transition:all .15s;letter-spacing:.2px
-  }
-  .orient-btn:hover{border-color:var(--border2);background:var(--bg4)}
-  .orient-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,170,.08)}
+/* FACE DIAGRAM */
+.face-hint{font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;letter-spacing:.1px}
+.face-svg-wrap{width:100%;margin-bottom:6px}
+.face-svg-wrap svg{width:100%;height:auto;display:block}
+.fh{cursor:pointer;transition:opacity .12s}
+.fh:hover rect,.fh:hover polygon{opacity:.8}
+.fh.on rect,.fh.on polygon{stroke:var(--accent)!important;stroke-width:2.5!important}
+.fh.img rect,.fh.img polygon{fill:#ffe8e8!important}
 
-  .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-  .preset-btn{
-    height:28px;border:1px solid var(--border);border-radius:var(--radius-sm);
-    background:var(--bg3);color:var(--text2);font-size:10px;font-weight:700;
-    cursor:pointer;transition:all .15s;letter-spacing:.2px
-  }
-  .preset-btn:hover{background:var(--bg4);border-color:var(--border2);color:var(--text)}
+.face-clears{display:flex;gap:4px;flex-wrap:wrap;min-height:6px}
+.fc-btn{height:21px;padding:0 7px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:10px;font-weight:700;cursor:pointer}
+.fc-btn:hover{background:var(--bg3)}
 
-  .pallet-presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
-  .pallet-preset{
-    padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);
-    background:var(--bg3);cursor:pointer;transition:all .15s
-  }
-  .pallet-preset:hover{border-color:var(--accent);background:var(--bg4)}
-  .pallet-preset .pp-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
-  .pallet-preset .pp-size{font-size:10px;color:var(--text3)}
+/* STATS */
+.st-panel{padding:11px 15px}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px}
+.sc.hi{background:var(--accent-bg);border-color:var(--accent-bdr)}
+.sv{font-size:20px;font-weight:800;line-height:1;letter-spacing:-.5px}
+.sc.hi .sv{color:var(--accent)}
+.sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text3);margin-top:3px}
 
-  /* UPLOAD DESIGN */
-  .face-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-  .face-btn{
-    position:relative;aspect-ratio:1;border:1.5px dashed var(--border2);border-radius:var(--radius-sm);
-    background:var(--bg3);cursor:pointer;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:3px;transition:all .15s;overflow:hidden
-  }
-  .face-btn:hover{border-color:var(--text2)}
-  .face-btn.active{border-color:var(--accent);border-style:solid;background:rgba(0,212,170,.06)}
-  .face-btn.has-img{border-style:solid;border-color:var(--accent2)}
-  .face-btn span.face-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;z-index:1}
-  .face-btn .face-preview{position:absolute;inset:0;object-fit:cover;opacity:.85;border-radius:4px}
-  .face-btn .clear-face{
-    position:absolute;top:3px;right:3px;width:16px;height:16px;
-    background:rgba(239,68,68,.9);border-radius:50%;border:none;cursor:pointer;
-    color:#fff;font-size:10px;display:none;align-items:center;justify-content:center;z-index:2
-  }
-  .face-btn.has-img .clear-face{display:flex}
+.eff-row{margin-bottom:8px}
+.eff-top{display:flex;justify-content:space-between;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.eff-top :first-child{color:var(--text3)} .eff-top :last-child{color:var(--accent)}
+.eff-track{height:5px;background:var(--bg3);border-radius:2px;overflow:hidden;border:1px solid var(--border)}
+.eff-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .35s}
 
-  /* STATS */
-  .stats-panel{padding:14px 20px}
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-  .stat-card{
-    background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
-    padding:10px 12px
-  }
-  .stat-card.highlight{background:rgba(0,212,170,.1);border-color:rgba(0,212,170,.3)}
-  .stat-val{font-size:22px;font-weight:700;color:var(--text);line-height:1.1;letter-spacing:-.5px}
-  .stat-card.highlight .stat-val{color:var(--accent)}
-  .stat-lbl{font-size:10px;color:var(--text3);margin-top:3px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.warn{background:var(--warn-bg);border:1px solid var(--warn-bdr);border-radius:var(--r);padding:6px 8px;font-size:11px;color:var(--warn-txt);margin-bottom:7px;display:none;align-items:flex-start;gap:4px}
+.info-box{background:var(--info-bg);border:1px solid var(--info-bdr);border-radius:var(--r);padding:6px 8px;font-size:11px;color:var(--info-txt);margin-bottom:7px;display:none}
 
-  .eff-row{margin-bottom:10px}
-  .eff-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-  .eff-label span:first-child{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text3)}
-  .eff-label span:last-child{font-size:12px;font-weight:700;color:var(--accent)}
-  .eff-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
-  .eff-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent3),var(--accent));transition:width .4s}
+.dt{width:100%;border-collapse:collapse;font-size:11px}
+.dt tr{border-bottom:1px solid var(--border)}
+.dt tr:last-child{border:none}
+.dt td{padding:4px 3px}
+.dt td:first-child{color:var(--text2)}
+.dt td:last-child{text-align:right;font-weight:700}
 
-  .warn-box{
-    background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);
-    border-radius:var(--radius-sm);padding:8px 10px;font-size:11px;color:#fbbf24;
-    margin-bottom:10px;display:none;align-items:flex-start;gap:6px
-  }
+.actions{padding:9px 15px;border-top:1px solid var(--border);background:var(--bg);position:sticky;bottom:0}
+.btn-row{display:flex;gap:5px}
+.ab{flex:1;height:33px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:.3px}
+.ab:hover{background:var(--bg3);color:var(--text)}
+.ab.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.ab.pri:hover{background:var(--accent2)}
 
-  .detail-table{width:100%;border-collapse:collapse;font-size:11px}
-  .detail-table tr{border-bottom:1px solid var(--border)}
-  .detail-table tr:last-child{border:none}
-  .detail-table td{padding:5px 4px}
-  .detail-table td:first-child{color:var(--text2)}
-  .detail-table td:last-child{text-align:right;font-weight:600;color:var(--text)}
+/* CANVAS */
+#cv-wrap{flex:1;position:relative;background:linear-gradient(150deg,#e9ecef,#d0d4da);overflow:hidden}
+#cv-wrap canvas{display:block;width:100%;height:100%}
 
-  /* ACTIONS */
-  .actions{padding:14px 20px;border-top:1px solid var(--border);background:var(--bg);margin-top:auto}
-  .btn-row{display:flex;gap:6px}
-  .act-btn{
-    flex:1;height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);
-    background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;
-    cursor:pointer;transition:all .15s;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:5px
-  }
-  .act-btn:hover{background:var(--bg4);color:var(--text)}
-  .act-btn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:800}
-  .act-btn.primary:hover{background:var(--accent2)}
+.cam-row{position:absolute;top:13px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5}
+.cb{height:27px;padding:0 12px;border:1px solid rgba(0,0,0,.15);border-radius:var(--r);background:rgba(255,255,255,.88);color:#444;font-size:10px;font-weight:800;letter-spacing:.4px;cursor:pointer;transition:all .12s}
+.cb:hover{background:#fff;color:#111}
+.cb.on{background:var(--accent);border-color:var(--accent);color:#fff}
 
-  /* CANVAS */
-  #canvas-container{
-    flex:1;position:relative;background:radial-gradient(ellipse at 40% 35%,#1a2540 0%,#0a0e1a 70%);
-    overflow:hidden
-  }
-  #canvas-container canvas{display:block;width:100%;height:100%}
+.ov-panel{position:absolute;bottom:13px;right:13px;background:rgba(255,255,255,.93);border:1px solid rgba(0,0,0,.1);border-radius:var(--r);padding:9px 13px;font-size:11px;color:var(--text2)}
+.ov-panel div{margin-bottom:3px;display:flex;justify-content:space-between;gap:18px}
+.ov-panel div:last-child{margin:0}
+.ov-panel span{font-weight:800;color:var(--accent)}
+.ov-panel .ov-blue span{color:var(--info-txt)}
 
-  .cam-controls{
-    position:absolute;top:16px;left:50%;transform:translateX(-50%);
-    display:flex;gap:6px;z-index:5
-  }
-  .cam-btn{
-    height:30px;padding:0 14px;border:1px solid rgba(255,255,255,.15);border-radius:20px;
-    background:rgba(15,17,23,.75);backdrop-filter:blur(8px);
-    color:rgba(255,255,255,.7);font-size:11px;font-weight:700;letter-spacing:.4px;
-    cursor:pointer;transition:all .15s
-  }
-  .cam-btn:hover{background:rgba(30,37,53,.9);border-color:rgba(255,255,255,.25);color:#fff}
-  .cam-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--accent);color:#fff;padding:6px 16px;border-radius:var(--r);font-size:12px;font-weight:700;z-index:100;transition:transform .22s;pointer-events:none}
+.toast.on{transform:translateX(-50%) translateY(0)}
 
-  .info-overlay{
-    position:absolute;bottom:16px;right:16px;
-    background:rgba(15,17,23,.8);backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);
-    padding:12px 16px;font-size:11px;color:rgba(255,255,255,.6)
-  }
-  .info-overlay div{margin-bottom:3px;display:flex;justify-content:space-between;gap:20px}
-  .info-overlay div:last-child{margin:0}
-  .info-overlay span{font-weight:700;color:var(--accent)}
-
-  .toast{
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);
-    background:var(--accent);color:#000;padding:8px 20px;border-radius:20px;
-    font-size:12px;font-weight:700;z-index:100;transition:transform .3s;pointer-events:none
-  }
-  .toast.show{transform:translateX(-50%) translateY(0)}
+.mix-badge{display:inline-block;background:var(--warn-bg);border:1px solid var(--warn-bdr);border-radius:var(--r);font-size:9px;font-weight:800;padding:1px 5px;color:var(--warn-txt);margin-left:4px;vertical-align:middle}
 </style>
 </head>
 <body>
 
 <div id="sidebar">
-  <div class="sidebar-header">
+  <div class="sid-head">
     <h1>Pallet Load Calculator</h1>
-    <p>Professional 3D pallet stacking tool</p>
+    <p>Professional 3D stacking tool</p>
     <div class="unit-bar">
-      <button id="btn-in" class="active" onclick="setUnit('in')">INCHES</button>
-      <button id="btn-cm" onclick="setUnit('cm')">CM</button>
+      <button id="b-in" class="on" onclick="setUnit('in')">INCHES</button>
+      <button id="b-cm" onclick="setUnit('cm')">CENTIMETRES</button>
     </div>
   </div>
 
   <!-- PALLET -->
-  <div class="section">
-    <div class="section-title">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="14" width="20" height="4"/><rect x="2" y="18" width="20" height="3"/><path d="M6 14V8M12 14V8M18 14V8"/></svg>
-      Pallet
+  <div class="sec">
+    <div class="st">Pallet</div>
+    <div class="pal-grid">
+      <div class="pal-pre on" id="pp0" onclick="setPP(0)"><div class="pn">GMA / US</div><div class="ps" id="pps0">48 × 40 in</div></div>
+      <div class="pal-pre" id="pp1" onclick="setPP(1)"><div class="pn">EUR 1</div><div class="ps" id="pps1">43.3 × 35.4 in</div></div>
+      <div class="pal-pre" id="pp2" onclick="setPP(2)"><div class="pn">EUR 2</div><div class="ps" id="pps2">47.2 × 31.5 in</div></div>
+      <div class="pal-pre" id="pp3" onclick="setPP(3)"><div class="pn">Square</div><div class="ps" id="pps3">42 × 42 in</div></div>
     </div>
-    <div class="pallet-presets">
-      <div class="pallet-preset" onclick="setPalletPreset(48,40,'EUR/US 48×40')">
-        <div class="pp-name">EUR/US</div>
-        <div class="pp-size" id="pp1-size">48 × 40 in</div>
-      </div>
-      <div class="pallet-preset" onclick="setPalletPreset(40,48,'Standard 40×48')">
-        <div class="pp-name">Standard</div>
-        <div class="pp-size" id="pp2-size">40 × 48 in</div>
-      </div>
-      <div class="pallet-preset" onclick="setPalletPreset(42,42,'Square 42×42')">
-        <div class="pp-name">Square</div>
-        <div class="pp-size" id="pp3-size">42 × 42 in</div>
-      </div>
-      <div class="pallet-preset" onclick="setPalletPreset(43.3,35.4,'EUR 110×90 cm')">
-        <div class="pp-name">EUR 1</div>
-        <div class="pp-size" id="pp4-size">43.3 × 35.4 in</div>
-      </div>
-    </div>
-    <div class="grid2" style="margin-top:10px">
-      <div class="field"><label id="lbl-pw">Width (in)</label><input type="number" id="palW" value="48" min="1" step="0.5" oninput="calc()"></div>
-      <div class="field"><label id="lbl-pd">Depth (in)</label><input type="number" id="palD" value="40" min="1" step="0.5" oninput="calc()"></div>
-      <div class="field"><label id="lbl-ph">Max height (in)</label><input type="number" id="palMaxH" value="60" min="1" step="0.5" oninput="calc()"></div>
-      <div class="field"><label id="lbl-pmw">Max weight (lb)</label><input type="number" id="palMaxW" value="2200" min="0" step="50" oninput="calc()"></div>
+    <div class="g2">
+      <div class="f"><label id="l-pw">Width W (in)</label><input type="number" id="palW" value="48" min="1" step="0.5" oninput="calc()"></div>
+      <div class="f"><label id="l-pd">Length L (in)</label><input type="number" id="palD" value="40" min="1" step="0.5" oninput="calc()"></div>
+      <div class="f"><label id="l-ph">Max height (in)</label><input type="number" id="palMaxH" value="60" min="1" step="0.5" oninput="calc()"></div>
+      <div class="f"><label id="l-mw">Max weight (lb)</label><input type="number" id="palMaxW" value="2200" min="0" step="50" oninput="calc()"></div>
     </div>
   </div>
 
   <!-- BOX -->
-  <div class="section">
-    <div class="section-title">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-      Box dimensions
+  <div class="sec">
+    <div class="st">Box dimensions — W × L × H</div>
+    <div class="g3">
+      <div class="f"><label id="l-bw">W (in)</label><input type="number" id="boxW" value="10" min="0.5" step="0.5" oninput="calc()"></div>
+      <div class="f"><label id="l-bl">L (in)</label><input type="number" id="boxL" value="12" min="0.5" step="0.5" oninput="calc()"></div>
+      <div class="f"><label id="l-bh">H (in)</label><input type="number" id="boxH" value="8" min="0.5" step="0.5" oninput="calc()"></div>
     </div>
-    <div class="grid3">
-      <div class="field"><label id="lbl-bl">Length (in)</label><input type="number" id="boxL" value="12" min="0.5" step="0.5" oninput="calc()"></div>
-      <div class="field"><label id="lbl-bw">Width (in)</label><input type="number" id="boxW" value="10" min="0.5" step="0.5" oninput="calc()"></div>
-      <div class="field"><label id="lbl-bh">Height (in)</label><input type="number" id="boxH" value="8" min="0.5" step="0.5" oninput="calc()"></div>
-    </div>
-    <div class="grid2" style="margin-top:8px">
-      <div class="field"><label id="lbl-bwt">Weight/box (lb)</label><input type="number" id="boxWt" value="5" min="0" step="0.1" oninput="calc()"></div>
-      <div class="field"><label>Overhang (in)</label><input type="number" id="overhang" value="0" min="0" step="0.5" oninput="calc()"></div>
+    <div class="g2" style="margin-top:6px">
+      <div class="f"><label id="l-bwt">Weight/box (lb)</label><input type="number" id="boxWt" value="5" min="0" step="0.1" oninput="calc()"></div>
+      <div class="f"><label id="l-ovh">Overhang (in)</label><input type="number" id="overhang" value="0" min="0" step="0.25" oninput="calc()"></div>
     </div>
   </div>
 
   <!-- STACKING -->
-  <div class="section">
-    <div class="section-title">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Stacking
-    </div>
-    <div class="field" style="margin-bottom:10px">
+  <div class="sec">
+    <div class="st">Stacking</div>
+    <div class="f" style="margin-bottom:7px">
       <label>Orientation</label>
-      <div class="orient-grid">
-        <button class="orient-btn active" id="ob-auto" onclick="setOrient('auto')">Auto (best)</button>
-        <button class="orient-btn" id="ob-flat" onclick="setOrient('flat')">Flat</button>
-        <button class="orient-btn" id="ob-side" onclick="setOrient('side')">On side</button>
-        <button class="orient-btn" id="ob-stand" onclick="setOrient('stand')">Standing</button>
+      <div class="ob-grid">
+        <button class="ob on" id="ob-auto" onclick="setOrient('auto')">Auto best</button>
+        <button class="ob" id="ob-mixed" onclick="setOrient('mixed')">Mixed rows</button>
+        <button class="ob" id="ob-flat" onclick="setOrient('flat')">W×L flat</button>
+        <button class="ob" id="ob-rot" onclick="setOrient('rot')">L×W rotated</button>
       </div>
     </div>
-    <div class="grid2">
-      <div class="field">
-        <label>Layers: <span id="layerVal" style="color:var(--accent)">5</span></label>
-        <input type="range" id="layerRange" min="1" max="20" value="5" oninput="layerSlider(this)">
+    <div class="g2">
+      <div class="f">
+        <label>Layers: <strong id="lv" style="color:var(--accent)">5</strong></label>
+        <input type="range" id="lrange" min="1" max="20" value="5" oninput="lslide(this)">
       </div>
-      <div class="field"><label>Max layers</label><input type="number" id="maxLayers" value="20" min="1" step="1" oninput="calc()"></div>
+      <div class="f"><label>Max layers</label><input type="number" id="maxL" value="20" min="1" step="1" oninput="calc()"></div>
     </div>
   </div>
 
-  <!-- DESIGN -->
-  <div class="section">
-    <div class="section-title">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-      Box design
+  <!-- BOX DESIGN -->
+  <div class="sec">
+    <div class="st">Box design</div>
+    <div class="g2" style="margin-bottom:7px">
+      <div class="f"><label>Box colour</label><input type="color" id="boxCol" value="#d4a96a" oninput="draw()"></div>
+      <div class="f"><label>Tape colour</label><input type="color" id="tapeCol" value="#d4161a" oninput="draw()"></div>
     </div>
-    <div class="grid2" style="margin-bottom:10px">
-      <div class="field"><label>Box colour</label><input type="color" id="boxColor" value="#c19a6b" oninput="draw()"></div>
-      <div class="field"><label>Accent colour</label><input type="color" id="accentColor" value="#8b5e3c" oninput="draw()"></div>
+    <div class="f" style="margin-bottom:7px">
+      <label>Opacity: <strong id="opv">95</strong>%</label>
+      <input type="range" id="opRange" min="20" max="100" value="95" step="1" oninput="opslide(this)">
     </div>
-    <div class="field" style="margin-bottom:6px">
-      <label>Opacity: <span id="opacityVal">90</span>%</label>
-      <input type="range" id="boxOpacity" min="30" max="100" value="90" step="1" oninput="opacitySlider(this)">
+    <div class="face-hint">Click a face → paste image (Cmd/Ctrl+V)</div>
+    <!-- Face diagram SVG - unfolded cross layout -->
+    <div class="face-svg-wrap">
+      <svg id="fsvg" viewBox="0 0 270 190" xmlns="http://www.w3.org/2000/svg">
+        <!-- TOP (W×L) -->
+        <g class="fh" id="fh-top" onclick="setFace('top')">
+          <rect x="80" y="5" width="80" height="50" fill="#e8dfc8" stroke="#c8b898" stroke-width="1" rx="1"/>
+          <image id="fi-top" x="80" y="5" width="80" height="50" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <text x="120" y="27" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">TOP</text>
+          <text x="120" y="39" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">W × L</text>
+        </g>
+        <!-- FRONT (W×H) — main -->
+        <g class="fh on" id="fh-front" onclick="setFace('front')">
+          <rect x="80" y="58" width="80" height="60" fill="#f0e6cc" stroke="#c8b898" stroke-width="1" rx="1"/>
+          <image id="fi-front" x="80" y="58" width="80" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <text x="120" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">FRONT</text>
+          <text x="120" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">W × H</text>
+        </g>
+        <!-- BOTTOM (W×L) -->
+        <g class="fh" id="fh-bottom" onclick="setFace('bottom')">
+          <rect x="80" y="121" width="80" height="50" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
+          <image id="fi-bottom" x="80" y="121" width="80" height="50" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <text x="120" y="150" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">BOTTOM</text>
+        </g>
+        <!-- LEFT (L×H) -->
+        <g class="fh" id="fh-left" onclick="setFace('left')">
+          <rect x="14" y="58" width="62" height="60" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
+          <image id="fi-left" x="14" y="58" width="62" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <text x="45" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">LEFT</text>
+          <text x="45" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">L × H</text>
+        </g>
+        <!-- RIGHT (L×H) -->
+        <g class="fh" id="fh-right" onclick="setFace('right')">
+          <rect x="164" y="58" width="62" height="60" fill="#e0d7bf" stroke="#c8b898" stroke-width="1" rx="1"/>
+          <image id="fi-right" x="164" y="58" width="62" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <text x="195" y="89" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif" font-weight="700">RIGHT</text>
+          <text x="195" y="101" text-anchor="middle" font-size="8" fill="#aaa" font-family="sans-serif">L × H</text>
+        </g>
+        <!-- BACK (W×H) -->
+        <g class="fh" id="fh-back" onclick="setFace('back')">
+          <rect x="230" y="58" width="34" height="60" fill="#e8dfc8" stroke="#c8b898" stroke-width="1" rx="1"/>
+          <image id="fi-back" x="230" y="58" width="34" height="60" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+          <text x="247" y="86" text-anchor="middle" font-size="8" fill="#888" font-family="sans-serif" font-weight="700">BACK</text>
+          <text x="247" y="96" text-anchor="middle" font-size="7" fill="#aaa" font-family="sans-serif">W×H</text>
+        </g>
+        <!-- dim arrows -->
+        <text x="119" y="3" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif">← W →</text>
+        <text x="10" y="91" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif" transform="rotate(-90,10,91)">H</text>
+        <text x="268" y="91" text-anchor="middle" font-size="7" fill="#ccc" font-family="sans-serif">L</text>
+      </svg>
     </div>
-    <div style="margin-top:10px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">
-        Click face to select → Cmd+V to paste image
-      </div>
-      <div class="face-grid">
-        <div class="face-btn active" id="face-front" onclick="setActiveFace('front')">
-          <img class="face-preview" id="prev-front" style="display:none">
-          <button class="clear-face" onclick="clearFace(event,'front')">×</button>
-          <span class="face-label">Front</span>
-        </div>
-        <div class="face-btn" id="face-back" onclick="setActiveFace('back')">
-          <img class="face-preview" id="prev-back" style="display:none">
-          <button class="clear-face" onclick="clearFace(event,'back')">×</button>
-          <span class="face-label">Back</span>
-        </div>
-        <div class="face-btn" id="face-left" onclick="setActiveFace('left')">
-          <img class="face-preview" id="prev-left" style="display:none">
-          <button class="clear-face" onclick="clearFace(event,'left')">×</button>
-          <span class="face-label">Left</span>
-        </div>
-        <div class="face-btn" id="face-right" onclick="setActiveFace('right')">
-          <img class="face-preview" id="prev-right" style="display:none">
-          <button class="clear-face" onclick="clearFace(event,'right')">×</button>
-          <span class="face-label">Right</span>
-        </div>
-        <div class="face-btn" id="face-top" onclick="setActiveFace('top')">
-          <img class="face-preview" id="prev-top" style="display:none">
-          <button class="clear-face" onclick="clearFace(event,'top')">×</button>
-          <span class="face-label">Top</span>
-        </div>
-        <div class="face-btn" id="face-bottom" onclick="setActiveFace('bottom')">
-          <img class="face-preview" id="prev-bottom" style="display:none">
-          <button class="clear-face" onclick="clearFace(event,'bottom')">×</button>
-          <span class="face-label">Bottom</span>
-        </div>
-      </div>
-    </div>
+    <div class="face-clears" id="fclears"></div>
   </div>
 
   <!-- STATS -->
-  <div class="stats-panel">
-    <div class="stats-grid">
-      <div class="stat-card highlight">
-        <div class="stat-val" id="r-total">—</div>
-        <div class="stat-lbl">Total boxes</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="r-layers">—</div>
-        <div class="stat-lbl">Layers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="r-perlayer">—</div>
-        <div class="stat-lbl">Per layer</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="r-weight">—</div>
-        <div class="stat-lbl" id="weight-lbl">Weight (lb)</div>
-      </div>
+  <div class="st-panel">
+    <div class="st-grid">
+      <div class="sc hi"><div class="sv" id="r-tot">—</div><div class="sl">Total boxes</div></div>
+      <div class="sc"><div class="sv" id="r-lay">—</div><div class="sl">Layers</div></div>
+      <div class="sc"><div class="sv" id="r-pl">—</div><div class="sl">Per layer</div></div>
+      <div class="sc"><div class="sv" id="r-wt">—</div><div class="sl" id="wt-lbl">Weight (lb)</div></div>
     </div>
-
     <div class="eff-row">
-      <div class="eff-label">
-        <span>Space efficiency</span>
-        <span id="r-eff">—</span>
-      </div>
-      <div class="eff-track"><div class="eff-fill" id="eff-fill" style="width:0%"></div></div>
+      <div class="eff-top"><span>Space efficiency</span><span id="r-eff">—</span></div>
+      <div class="eff-track"><div class="eff-fill" id="eff-f" style="width:0%"></div></div>
     </div>
-
-    <div class="warn-box" id="warn-weight">
-      <span>⚠</span>
-      <span id="warn-text">Weight may exceed pallet capacity</span>
-    </div>
-
-    <table class="detail-table" id="detail-table"></table>
+    <div class="warn" id="w-wt">⚠ <span id="w-wt-t"></span></div>
+    <div class="info-box" id="ohinfo"></div>
+    <table class="dt" id="dtbl"></table>
   </div>
 
-  <!-- ACTIONS -->
   <div class="actions">
     <div class="btn-row">
-      <button class="act-btn" onclick="copyResults()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Copy
-      </button>
-      <button class="act-btn" onclick="exportCSV()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        CSV
-      </button>
-      <button class="act-btn primary" onclick="exportPNG()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        PNG
-      </button>
+      <button class="ab" onclick="copyR()">Copy</button>
+      <button class="ab" onclick="exportCSV()">CSV</button>
+      <button class="ab pri" onclick="exportPNG()">PNG</button>
     </div>
   </div>
 </div>
 
-<!-- 3D CANVAS -->
-<div id="canvas-container">
-  <div class="cam-controls">
-    <button class="cam-btn active" id="cam-iso" onclick="setCamera('iso')">3/4 ISO</button>
-    <button class="cam-btn" id="cam-top" onclick="setCamera('top')">TOP</button>
-    <button class="cam-btn" id="cam-front" onclick="setCamera('front')">FRONT</button>
-    <button class="cam-btn" id="cam-side" onclick="setCamera('side')">SIDE</button>
+<!-- 3D -->
+<div id="cv-wrap">
+  <div class="cam-row">
+    <button class="cb on" id="c-iso" onclick="setCam('iso')">3/4 ISO</button>
+    <button class="cb" id="c-top" onclick="setCam('top')">TOP</button>
+    <button class="cb" id="c-front" onclick="setCam('front')">FRONT</button>
+    <button class="cb" id="c-side" onclick="setCam('side')">SIDE</button>
   </div>
-  <div class="info-overlay" id="info-overlay" style="display:none">
-    <div>Boxes per layer <span id="ov-perlayer">—</span></div>
-    <div>Stack height <span id="ov-height">—</span></div>
-    <div>Total weight <span id="ov-weight">—</span></div>
+  <div class="ov-panel" id="ov-panel" style="display:none">
+    <div>Per layer <span id="ov-pl">—</span></div>
+    <div>Stack height <span id="ov-sh">—</span></div>
+    <div>Total weight <span id="ov-wt">—</span></div>
+    <div class="ov-blue" id="ov-oh-row" style="display:none">Overhang <span id="ov-oh">—</span></div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
-let unit = 'in', orient = 'auto', activeFace = 'front';
-let faceImages = {front:null,back:null,left:null,right:null,top:null,bottom:null};
-let faceTextures = {front:null,back:null,left:null,right:null,top:null,bottom:null};
-let scene, camera, renderer, controls;
-let boxesGroup, palletGroup, mainGroup;
-let currentCam = 'iso';
+// ── state
+let unit='in', orient='auto', activeFace='front';
+let fImgData={front:null,back:null,left:null,right:null,top:null,bottom:null};
+let fTexCache={front:null,back:null,left:null,right:null,top:null,bottom:null};
+let scene,cam,rnd,ctrl,boxGrp,palGrp,mainGrp,lastR=null;
+const IC=2.54;
+const PALS=[{n:'GMA / US',w:48,d:40},{n:'EUR 1',w:43.3,d:35.4},{n:'EUR 2',w:47.2,d:31.5},{n:'Square',w:42,d:42}];
 
-const IN_TO_CM = 2.54;
-
-// ─── Unit helpers ─────────────────────────────────────────────────────────────
-function toDisplay(v){ return unit === 'cm' ? +(v * IN_TO_CM).toFixed(1) : v; }
-function toIn(v){ return unit === 'cm' ? v / IN_TO_CM : v; }
-function unitLabel(){ return unit === 'in' ? 'in' : 'cm'; }
-function weightLabel(){ return unit === 'in' ? 'lb' : 'kg'; }
-function convWeight(lb){ return unit === 'cm' ? +(lb * 0.453592).toFixed(1) : lb; }
+// ── units
+const ul=()=>unit==='cm'?'cm':'in';
+const wl=()=>unit==='cm'?'kg':'lb';
+const toIn=v=>unit==='cm'?v/IC:v;
+const toD=v=>unit==='cm'?+(v*IC).toFixed(1):v;
+const wD=lb=>unit==='cm'?+(lb*0.453592).toFixed(1):lb;
 
 function setUnit(u){
-  const prevUnit = unit;
-  if(prevUnit === u) return;
-  
-  const fields = [
-    {id:'palW',prev:prevUnit},{id:'palD',prev:prevUnit},
-    {id:'palMaxH',prev:prevUnit},{id:'boxL',prev:prevUnit},
-    {id:'boxW',prev:prevUnit},{id:'boxH',prev:prevUnit},
-    {id:'overhang',prev:prevUnit}
-  ];
-  
-  unit = u;
-  
-  fields.forEach(f => {
-    const el = document.getElementById(f.id);
-    const val = parseFloat(el.value)||0;
-    if(u === 'cm') el.value = +(val * IN_TO_CM).toFixed(1);
-    else el.value = +(val / IN_TO_CM).toFixed(2);
+  if(unit===u)return; const p=unit; unit=u;
+  ['palW','palD','palMaxH','boxW','boxL','boxH','overhang'].forEach(id=>{
+    const e=document.getElementById(id),v=parseFloat(e.value)||0;
+    e.value=u==='cm'?+(v*IC).toFixed(1):+(v/IC).toFixed(2);
   });
-
-  // Weight
-  const wtEl = document.getElementById('boxWt');
-  const mwEl = document.getElementById('palMaxW');
-  if(u === 'cm'){
-    wtEl.value = +(parseFloat(wtEl.value)*0.453592).toFixed(2);
-    mwEl.value = +(parseFloat(mwEl.value)*0.453592).toFixed(0);
-  } else {
-    wtEl.value = +(parseFloat(wtEl.value)/0.453592).toFixed(2);
-    mwEl.value = +(parseFloat(mwEl.value)/0.453592).toFixed(0);
-  }
-
-  document.getElementById('btn-in').classList.toggle('active', u==='in');
-  document.getElementById('btn-cm').classList.toggle('active', u==='cm');
-
-  updateLabels();
-  updatePresetLabels();
-  calc();
+  const we=document.getElementById('boxWt'),me=document.getElementById('palMaxW');
+  if(u==='cm'){we.value=+(parseFloat(we.value)*0.453592).toFixed(2);me.value=+(parseFloat(me.value)*0.453592).toFixed(0);}
+  else{we.value=+(parseFloat(we.value)/0.453592).toFixed(2);me.value=+(parseFloat(me.value)/0.453592).toFixed(0);}
+  document.getElementById('b-in').classList.toggle('on',u==='in');
+  document.getElementById('b-cm').classList.toggle('on',u==='cm');
+  updLabels();updPP();calc();
 }
-
-function updateLabels(){
-  const u = unitLabel();
-  const w = weightLabel();
-  document.getElementById('lbl-pw').textContent = `Width (${u})`;
-  document.getElementById('lbl-pd').textContent = `Depth (${u})`;
-  document.getElementById('lbl-ph').textContent = `Max height (${u})`;
-  document.getElementById('lbl-pmw').textContent = `Max weight (${w})`;
-  document.getElementById('lbl-bl').textContent = `Length (${u})`;
-  document.getElementById('lbl-bw').textContent = `Width (${u})`;
-  document.getElementById('lbl-bh').textContent = `Height (${u})`;
-  document.getElementById('lbl-bwt').textContent = `Weight/box (${w})`;
-  document.getElementById('weight-lbl').textContent = `Weight (${w})`;
-}
-
-function updatePresetLabels(){
-  const u = unitLabel();
-  const presets = [
-    {id:'pp1-size',w:48,d:40},{id:'pp2-size',w:40,d:48},
-    {id:'pp3-size',w:42,d:42},{id:'pp4-size',w:43.3,d:35.4}
-  ];
-  presets.forEach(p => {
-    const el = document.getElementById(p.id);
-    if(!el) return;
-    if(unit==='cm') el.textContent = `${+(p.w*IN_TO_CM).toFixed(1)} × ${+(p.d*IN_TO_CM).toFixed(1)} cm`;
-    else el.textContent = `${p.w} × ${p.d} in`;
-  });
-}
-
-function setPalletPreset(w,d,name){
-  const W = unit==='cm' ? +(w*IN_TO_CM).toFixed(1) : w;
-  const D = unit==='cm' ? +(d*IN_TO_CM).toFixed(1) : d;
-  document.getElementById('palW').value = W;
-  document.getElementById('palD').value = D;
-  calc();
-  showToast(`Pallet: ${name}`);
-}
-
-function setOrient(o){
-  orient = o;
-  ['auto','flat','side','stand'].forEach(x => document.getElementById('ob-'+x).classList.toggle('active', x===o));
-  calc();
-}
-
-function layerSlider(el){
-  document.getElementById('layerVal').textContent = el.value;
-  document.getElementById('maxLayers').value = el.value;
-  calc();
-}
-
-function opacitySlider(el){
-  document.getElementById('opacityVal').textContent = el.value;
-  draw();
-}
-
-// ─── Face / Design ────────────────────────────────────────────────────────────
-function setActiveFace(face){
-  activeFace = face;
-  document.querySelectorAll('.face-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('face-'+face).classList.add('active');
-}
-
-function clearFace(e, face){
-  e.stopPropagation();
-  faceImages[face] = null;
-  faceTextures[face] = null;
-  const prev = document.getElementById('prev-'+face);
-  prev.style.display = 'none';
-  prev.src = '';
-  document.getElementById('face-'+face).classList.remove('has-img');
-  draw();
-}
-
-window.addEventListener('paste', e => {
-  const item = Array.from(e.clipboardData.items).find(x => x.type.indexOf('image')!==-1);
-  if(!item) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      faceImages[activeFace] = img;
-      buildFaceTexture(activeFace, img);
-      const prev = document.getElementById('prev-'+activeFace);
-      prev.src = ev.target.result;
-      prev.style.display = 'block';
-      document.getElementById('face-'+activeFace).classList.add('has-img');
-      draw();
-      showToast(`Image applied to ${activeFace} face`);
-    };
-    img.src = ev.target.result;
+function updLabels(){
+  const u=ul(),w=wl();
+  const lm={
+    'l-pw':`Width W (${u})`,'l-pd':`Length L (${u})`,'l-ph':`Max height (${u})`,'l-mw':`Max weight (${w})`,
+    'l-bw':`W (${u})`,'l-bl':`L (${u})`,'l-bh':`H (${u})`,'l-bwt':`Weight/box (${w})`,'l-ovh':`Overhang (${u})`
   };
-  reader.readAsDataURL(item.getAsFile());
+  Object.entries(lm).forEach(([id,t])=>{const e=document.getElementById(id);if(e)e.textContent=t;});
+  document.getElementById('wt-lbl').textContent=`Weight (${w})`;
+}
+function updPP(){
+  PALS.forEach((p,i)=>{
+    const e=document.getElementById('pps'+i); if(!e)return;
+    e.textContent=unit==='cm'?`${+(p.w*IC).toFixed(1)} × ${+(p.d*IC).toFixed(1)} cm`:`${p.w} × ${p.d} in`;
+  });
+}
+function setPP(i){
+  const p=PALS[i];
+  document.getElementById('palW').value=unit==='cm'?+(p.w*IC).toFixed(1):p.w;
+  document.getElementById('palD').value=unit==='cm'?+(p.d*IC).toFixed(1):p.d;
+  document.querySelectorAll('.pal-pre').forEach((e,j)=>e.classList.toggle('on',j===i));
+  calc();toast(`Preset: ${p.n}`);
+}
+function setOrient(o){
+  orient=o;
+  ['auto','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));
+  calc();
+}
+function lslide(el){document.getElementById('lv').textContent=el.value;document.getElementById('maxL').value=el.value;calc();}
+function opslide(el){document.getElementById('opv').textContent=el.value;draw();}
+
+// ── face interactions
+function setFace(f){
+  activeFace=f;
+  document.querySelectorAll('.fh').forEach(g=>g.classList.remove('on'));
+  document.getElementById('fh-'+f).classList.add('on');
+}
+setFace('front');
+
+window.addEventListener('paste',e=>{
+  const it=Array.from(e.clipboardData.items).find(x=>x.type.includes('image'));
+  if(!it)return;
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      fImgData[activeFace]=ev.target.result;
+      fTexCache[activeFace]=null;
+      const si=document.getElementById('fi-'+activeFace);
+      si.setAttribute('href',ev.target.result);si.style.display='block';
+      document.getElementById('fh-'+activeFace).classList.add('img');
+      updFClears();draw();toast(`Image → ${activeFace}`);
+    };
+    img.src=ev.target.result;
+  };
+  rd.readAsDataURL(it.getAsFile());
 });
 
-function buildFaceTexture(face, img){
-  const c = document.createElement('canvas');
-  c.width = 512; c.height = 512;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = document.getElementById('boxColor').value;
-  ctx.fillRect(0,0,512,512);
-  ctx.drawImage(img,0,0,512,512);
-  faceTextures[face] = new THREE.CanvasTexture(c);
+function clearFace(f){
+  fImgData[f]=null;fTexCache[f]=null;
+  const si=document.getElementById('fi-'+f);si.style.display='none';si.removeAttribute('href');
+  document.getElementById('fh-'+f).classList.remove('img');
+  updFClears();draw();
 }
-
-// ─── THREE.js Init ────────────────────────────────────────────────────────────
-function initThree(){
-  scene = new THREE.Scene();
-  scene.background = null;
-
-  const container = document.getElementById('canvas-container');
-  const W = container.clientWidth, H = container.clientHeight;
-
-  camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 5000);
-  camera.position.set(150, 120, 150);
-
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-  renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
-  container.appendChild(renderer.domElement);
-
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.07;
-  controls.maxPolarAngle = Math.PI / 1.85;
-  controls.minDistance = 20;
-  controls.maxDistance = 800;
-
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-
-  const sun = new THREE.DirectionalLight(0xfff5e0, 0.9);
-  sun.position.set(120, 200, 100);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 800;
-  sun.shadow.camera.left = -200;
-  sun.shadow.camera.right = 200;
-  sun.shadow.camera.top = 200;
-  sun.shadow.camera.bottom = -200;
-  sun.shadow.bias = -0.001;
-  scene.add(sun);
-
-  const fill = new THREE.DirectionalLight(0xd0e8ff, 0.35);
-  fill.position.set(-80, 60, -80);
-  scene.add(fill);
-
-  const rim = new THREE.DirectionalLight(0xffffff, 0.2);
-  rim.position.set(0, -50, -150);
-  scene.add(rim);
-
-  // Ground shadow plane
-  const groundGeo = new THREE.PlaneGeometry(2000, 2000);
-  const groundMat = new THREE.ShadowMaterial({ opacity: 0.15 });
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI/2;
-  ground.position.y = -0.5;
-  ground.receiveShadow = true;
-  scene.add(ground);
-
-  boxesGroup = new THREE.Group();
-  palletGroup = new THREE.Group();
-  mainGroup = new THREE.Group();
-  mainGroup.add(palletGroup);
-  mainGroup.add(boxesGroup);
-  scene.add(mainGroup);
-
-  window.addEventListener('resize', onResize);
-  animate();
-}
-
-function animate(){
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-function onResize(){
-  const container = document.getElementById('canvas-container');
-  const W = container.clientWidth, H = container.clientHeight;
-  camera.aspect = W/H;
-  camera.updateProjectionMatrix();
-  renderer.setSize(W, H);
-}
-
-// ─── Camera presets ───────────────────────────────────────────────────────────
-function setCamera(type){
-  currentCam = type;
-  document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('cam-'+type).classList.add('active');
-
-  const box = new THREE.Box3().setFromObject(mainGroup);
-  const center = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const dist = maxDim * 1.8;
-
-  controls.target.copy(center);
-
-  if(type==='iso') camera.position.set(center.x+dist*.8, center.y+dist*.7, center.z+dist*.8);
-  if(type==='top') camera.position.set(center.x, center.y+dist*1.4, center.z+0.01);
-  if(type==='front') camera.position.set(center.x, center.y+size.y*.3, center.z+dist*1.3);
-  if(type==='side') camera.position.set(center.x+dist*1.3, center.y+size.y*.3, center.z);
-
-  controls.update();
-}
-
-// ─── Pallet geometry ──────────────────────────────────────────────────────────
-function buildPallet(pL, pW){
-  palletGroup.clear();
-
-  const darkWood = new THREE.MeshStandardMaterial({ color:0x6b4311, roughness:0.92, metalness:0.0 });
-  const lightWood = new THREE.MeshStandardMaterial({ color:0x9b6b2e, roughness:0.88, metalness:0.0 });
-  const midWood = new THREE.MeshStandardMaterial({ color:0x7d5520, roughness:0.9, metalness:0.0 });
-
-  const PLANK_H = 1.1, STRINGER_H = 3.8, STRINGER_W = 3.5;
-  const BOTTOM_PLANK_W = 4.5, TOP_PLANK_W = 5.5, GAP = 1.8;
-  const baseY = 0;
-
-  // ── Bottom planks (3) ──
-  const numBotPlanks = 3;
-  const botPositions = [-pW/2+BOTTOM_PLANK_W/2, 0, pW/2-BOTTOM_PLANK_W/2];
-  botPositions.forEach((z,i) => {
-    const g = new THREE.BoxGeometry(pL, PLANK_H, BOTTOM_PLANK_W);
-    const m = new THREE.Mesh(g, i%2===0 ? darkWood : midWood);
-    m.position.set(0, baseY+PLANK_H/2, z);
-    m.castShadow = true; m.receiveShadow = true;
-    palletGroup.add(m);
-    // add wood grain lines
-    const eg = new THREE.EdgesGeometry(g);
-    const el = new THREE.LineSegments(eg, new THREE.LineBasicMaterial({color:0x3d2510,transparent:true,opacity:0.25}));
-    el.position.copy(m.position);
-    palletGroup.add(el);
+function updFClears(){
+  const c=document.getElementById('fclears');c.innerHTML='';
+  Object.keys(fImgData).forEach(f=>{
+    if(!fImgData[f])return;
+    const b=document.createElement('button');b.className='fc-btn';b.textContent='× '+f;
+    b.onclick=()=>clearFace(f);c.appendChild(b);
   });
+}
 
-  // ── Stringers/blocks (3×3 = 9) ──
-  const blockX = [-pL/2+STRINGER_W/2, 0, pL/2-STRINGER_W/2];
-  const blockZ = [-pW/2+STRINGER_W/2+1, 0, pW/2-STRINGER_W/2-1];
-  blockX.forEach((x,xi) => {
-    blockZ.forEach((z,zi) => {
-      const g = new THREE.BoxGeometry(STRINGER_W, STRINGER_H, STRINGER_W);
-      const m = new THREE.Mesh(g, (xi+zi)%2===0 ? lightWood : midWood);
-      m.position.set(x, baseY+PLANK_H+STRINGER_H/2, z);
-      m.castShadow = true; m.receiveShadow = true;
-      palletGroup.add(m);
-    });
-  });
+function getFTex(face){
+  if(fTexCache[face])return fTexCache[face];
+  const cv=document.createElement('canvas');cv.width=512;cv.height=512;
+  const ctx=cv.getContext('2d');
+  const base=document.getElementById('boxCol').value;
+  const tape=document.getElementById('tapeCol').value;
 
-  // ── Top planks ──
-  const topY = baseY + PLANK_H + STRINGER_H;
-  const numTopPlanks = Math.max(5, Math.floor(pW / (TOP_PLANK_W + GAP)));
-  const totalTopW = numTopPlanks * TOP_PLANK_W + (numTopPlanks-1) * GAP;
-  const topStartZ = -totalTopW/2 + TOP_PLANK_W/2;
+  ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+  // grain
+  ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
+  for(let i=0;i<512;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,512);ctx.stroke();}
 
-  for(let i=0; i<numTopPlanks; i++){
-    const z = topStartZ + i * (TOP_PLANK_W + GAP);
-    const g = new THREE.BoxGeometry(pL, PLANK_H, TOP_PLANK_W);
-    const m = new THREE.Mesh(g, i%2===0 ? lightWood : midWood);
-    m.position.set(0, topY+PLANK_H/2, z);
-    m.castShadow = true; m.receiveShadow = true;
-    palletGroup.add(m);
-    const eg = new THREE.EdgesGeometry(g);
-    const el = new THREE.LineSegments(eg, new THREE.LineBasicMaterial({color:0x3d2510,transparent:true,opacity:0.2}));
-    el.position.copy(m.position);
-    palletGroup.add(el);
+  if(face==='top'){
+    // flap cross
+    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(256,0);ctx.lineTo(256,512);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,256);ctx.lineTo(512,256);ctx.stroke();
+    // tape on cross
+    ctx.fillStyle=tape+'55';ctx.fillRect(238,0,36,512);ctx.fillRect(0,238,512,36);
+  } else if(face==='front'||face==='back'){
+    // horizontal tape stripe ~mid height
+    ctx.fillStyle=tape+'60';ctx.fillRect(0,215,512,42);
+    ctx.strokeStyle=tape+'88';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,215);ctx.lineTo(512,215);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,257);ctx.lineTo(512,257);ctx.stroke();
+  } else if(face==='left'||face==='right'){
+    // vertical tape
+    ctx.fillStyle=tape+'45';ctx.fillRect(228,0,56,512);
+    ctx.strokeStyle=tape+'77';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(228,0);ctx.lineTo(228,512);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(284,0);ctx.lineTo(284,512);ctx.stroke();
+  }
+  // shading
+  const sh=ctx.createLinearGradient(0,0,512,512);
+  sh.addColorStop(0,'rgba(255,255,255,.1)');sh.addColorStop(1,'rgba(0,0,0,.1)');
+  ctx.fillStyle=sh;ctx.fillRect(0,0,512,512);
+
+  if(fImgData[face]){const im=new Image();im.src=fImgData[face];ctx.drawImage(im,0,0,512,512);}
+
+  fTexCache[face]=new THREE.CanvasTexture(cv);
+  return fTexCache[face];
+}
+
+// ── pallet
+const PTOPH=5.5;
+function buildPallet(pW,pD){
+  palGrp.clear();
+  const dk=new THREE.MeshStandardMaterial({color:0x6b4412,roughness:.93,metalness:0});
+  const lt=new THREE.MeshStandardMaterial({color:0xa07030,roughness:.88,metalness:0});
+  const md=new THREE.MeshStandardMaterial({color:0x8a5820,roughness:.9,metalness:0});
+
+  function plank(mat,x,y,z,w,h,d){
+    const g=new THREE.BoxGeometry(w,h,d),m=new THREE.Mesh(g,mat);
+    m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;palGrp.add(m);
+    const el=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0x3a2008,transparent:true,opacity:.25}));
+    el.position.copy(m.position);palGrp.add(el);
   }
 
-  palletGroup.userData.topY = topY + PLANK_H;
+  const BH=0.85,SH=3.6,TH=0.9,BPW=4.2,STGW=3.6;
+  const yB=BH/2,yS=BH+SH/2,yT=BH+SH+TH/2;
+
+  // 3 bottom boards along depth
+  [-pD/2+BPW/2, 0, pD/2-BPW/2].forEach((z,i)=>plank(i===1?md:dk, 0,yB,z, pW,BH,BPW));
+
+  // 3×3 stringer blocks
+  const sxs=[-pW/2+STGW/2+.5, 0, pW/2-STGW/2-.5];
+  const szs=[-pD/2+STGW/2+.5, 0, pD/2-STGW/2-.5];
+  sxs.forEach((x,xi)=>szs.forEach((z,zi)=>plank((xi+zi)%2===0?lt:md, x,yS,z, STGW,SH,STGW)));
+
+  // 6 top deck planks (evenly spaced, full width)
+  const nP=6, pW2=4.5;
+  const totalZ=nP*pW2, gapZ=(pD-totalZ)/(nP-1);
+  for(let i=0;i<nP;i++){
+    const z=-pD/2+pW2/2+i*(pW2+gapZ);
+    plank(i%2===0?lt:md, 0,yT,z, pW,TH,pW2);
+  }
+  palGrp.userData.topY=BH+SH+TH;
+}
+function ptop(){return palGrp.userData.topY||PTOPH;}
+
+// ── layout engine
+function calcLayout(pW,pD,bW,bL,bH,oh,mode){
+  const eW=pW+oh*2, eD=pD+oh*2;
+  const A={cols:Math.floor(eW/bW),rows:Math.floor(eD/bL),bX:bW,bZ:bL,lH:bH,label:'flat'};
+  A.per=A.cols*A.rows;
+  const B={cols:Math.floor(eW/bL),rows:Math.floor(eD/bW),bX:bL,bZ:bW,lH:bH,label:'rotated'};
+  B.per=B.cols*B.rows;
+  const C={cols:Math.floor(eW/bW),rows:Math.floor(eD/bH),bX:bW,bZ:bH,lH:bL,label:'standing'};
+  C.per=C.cols*C.rows;
+
+  if(mode==='flat')return{...A,mixed:false};
+  if(mode==='rot')return{...B,mixed:false};
+  if(mode==='auto'){const best=[A,B,C].reduce((a,b)=>b.per>a.per?b:a);return{...best,mixed:false};}
+
+  if(mode==='mixed'){
+    // try combining A-columns + B-columns (same layH=bH, so only mix flat+rotated)
+    let best=A.per>=B.per?{...A,mixed:false}:{...B,mixed:false};
+    let bestPer=best.per;
+    const rowsA=A.rows, rowsB=B.rows;
+    for(let ca=0;ca<=Math.floor(eW/A.bX);ca++){
+      const remW=eW-ca*A.bX;
+      const cb=Math.floor(remW/B.bX);
+      const per=ca*rowsA+cb*rowsB;
+      if(per>bestPer){
+        bestPer=per;
+        best={
+          mixed:true,per,lH:bH,
+          cA:ca,rA:rowsA,bXA:A.bX,bZA:A.bZ,
+          cB:cb,rB:rowsB,bXB:B.bX,bZB:B.bZ,
+          desc:`${ca}×${rowsA} + ${cb}×${rowsB} rot`
+        };
+      }
+    }
+    return best;
+  }
+  return{...A,mixed:false};
 }
 
-function getPalletTop(){
-  return palletGroup.userData.topY || 5.7;
-}
-
-// ─── Box material ─────────────────────────────────────────────────────────────
-function makeBoxMats(bL, bW, bH){
-  const baseColor = document.getElementById('boxColor').value;
-  const accentHex = document.getElementById('accentColor').value;
-  const opacity = parseFloat(document.getElementById('boxOpacity').value) / 100;
-  const transparent = opacity < 1;
-
-  const mkMat = (face, dim1, dim2) => {
-    const tex = faceTextures[face];
-    if(tex){
-      tex.needsUpdate = true;
-      return new THREE.MeshStandardMaterial({map:tex, roughness:0.75, metalness:0.05, transparent, opacity});
-    }
-    // procedural cardboard look
-    const c = document.createElement('canvas');
-    c.width = 256; c.height = 256;
-    const ctx = c.getContext('2d');
-
-    ctx.fillStyle = baseColor;
-    ctx.fillRect(0,0,256,256);
-
-    // subtle texture lines
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-    ctx.lineWidth = 1;
-    for(let i=0;i<256;i+=8){
-      ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,256); ctx.stroke();
-    }
-
-    // flap lines on top
-    if(face==='top'){
-      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(128,0); ctx.lineTo(128,256); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0,128); ctx.lineTo(256,128); ctx.stroke();
-      ctx.fillStyle = accentHex+'33';
-      ctx.fillRect(0,0,128,128);
-      ctx.fillRect(128,128,128,128);
-    }
-
-    // tape line on front/back
-    if(face==='front'||face==='back'){
-      ctx.fillStyle = accentHex+'55';
-      ctx.fillRect(0, 110, 256, 36);
-    }
-
-    // edge shading
-    const grad = ctx.createLinearGradient(0,0,256,256);
-    grad.addColorStop(0,'rgba(255,255,255,0.1)');
-    grad.addColorStop(1,'rgba(0,0,0,0.1)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,256,256);
-
-    const t = new THREE.CanvasTexture(c);
-    return new THREE.MeshStandardMaterial({map:t, roughness:0.82, metalness:0.03, transparent, opacity});
-  };
-
-  // THREE face order: +X (right), -X (left), +Y (top), -Y (bottom), +Z (front), -Z (back)
-  return [
-    mkMat('right', bH, bW),
-    mkMat('left',  bH, bW),
-    mkMat('top',   bL, bW),
-    mkMat('bottom',bL, bW),
-    mkMat('front', bL, bH),
-    mkMat('back',  bL, bH),
-  ];
-}
-
-// ─── Calculate + Draw ─────────────────────────────────────────────────────────
-let lastResult = null;
-
-function getValIn(id){
-  const v = parseFloat(document.getElementById(id).value) || 0;
-  return unit === 'cm' ? v / IN_TO_CM : v;
-}
-
+// ── main calc
+function gv(id){const v=parseFloat(document.getElementById(id).value)||0;return unit==='cm'?v/IC:v;}
 function calc(){
-  const pW = getValIn('palW'), pD = getValIn('palD');
-  const maxH = getValIn('palMaxH');
-  const bL = getValIn('boxL'), bW = getValIn('boxW'), bH = getValIn('boxH');
-  const overhang = getValIn('overhang');
-  const maxLayers = parseInt(document.getElementById('maxLayers').value) || 999;
-  const bWt = unit==='cm'
-    ? (parseFloat(document.getElementById('boxWt').value)||0) / 0.453592
-    : (parseFloat(document.getElementById('boxWt').value)||0);
-  const palMaxW = unit==='cm'
-    ? (parseFloat(document.getElementById('palMaxW').value)||0) / 0.453592
-    : (parseFloat(document.getElementById('palMaxW').value)||0);
+  const pW=gv('palW'),pD=gv('palD'),maxH=gv('palMaxH');
+  const bW=gv('boxW'),bL=gv('boxL'),bH=gv('boxH'),oh=gv('overhang');
+  const maxLay=parseInt(document.getElementById('maxL').value)||999;
+  const bWtI=unit==='cm'?(parseFloat(document.getElementById('boxWt').value)||0)/0.453592:(parseFloat(document.getElementById('boxWt').value)||0);
+  const pmwI=unit==='cm'?(parseFloat(document.getElementById('palMaxW').value)||0)/0.453592:(parseFloat(document.getElementById('palMaxW').value)||0);
+  if(!pW||!pD||!bW||!bL||!bH)return;
 
-  if(!pW||!pD||!bL||!bW||!bH) return;
+  const lay=calcLayout(pW,pD,bW,bL,bH,oh,orient);
+  const ptH=ptop();
+  const maxLH=Math.max(1,Math.floor((maxH-ptH)/lay.lH));
+  const layers=Math.min(maxLay,maxLH);
+  const per=lay.mixed?lay.per:lay.per;
+  const total=per*layers;
+  const stackH=layers*lay.lH;
+  const totalH=ptH+stackH;
+  const totalWt=total*bWtI+45;
+  const eff=Math.round(Math.min(100,(total*bW*bL*bH)/(pW*pD*maxH)*100));
 
-  const effW = pW + overhang*2, effD = pD + overhang*2;
-
-  // Try all orientations
-  function tryLayout(lL, lW){
-    const cols = Math.floor(effW / lL);
-    const rows = Math.floor(effD / lW);
-    return {cols, rows, perLayer: cols*rows, boxL: lL, boxW: lW};
+  // overhang actual
+  let ovhW=0,ovhL=0;
+  if(oh>0&&!lay.mixed){
+    ovhW=Math.max(0,(lay.cols||0)*lay.bX-pW);
+    ovhL=Math.max(0,(lay.rows||0)*lay.bZ-pD);
   }
 
-  const orientations = {
-    flat:  tryLayout(bL, bW),
-    side:  tryLayout(bW, bL),
-    stand: tryLayout(bL, bH),
-  };
-
-  let layout;
-  if(orient==='auto'){
-    layout = [orientations.flat, orientations.side, orientations.stand]
-      .reduce((a,b) => b.perLayer > a.perLayer ? b : a);
-  } else if(orient==='flat') layout = orientations.flat;
-  else if(orient==='side')   layout = orientations.side;
-  else layout = orientations.stand;
-
-  const layerH = (orient==='stand') ? bL : bH;
-  const palletTopH = getPalletTop() + 0.5; // approx inches
-  const maxLayersH = Math.floor((maxH - palletTopH) / layerH);
-  const layers = Math.min(maxLayers, Math.max(1, maxLayersH));
-
-  const total = layout.perLayer * layers;
-  const stackH = layers * layerH;
-  const palletH = 5.7; // inches approx
-  const totalH = palletH + stackH;
-  const totalWt = total * bWt + 45; // +45lb pallet
-  const boxVol = bL * bW * bH;
-  const palVol = pW * pD * maxH;
-  const eff = Math.round(Math.min(100, (total * boxVol / palVol) * 100));
-
-  lastResult = {
-    layout, layers, total, stackH, totalH, totalWt, eff, bWt, palMaxW,
-    pW, pD, bL:layout.boxL, bW:layout.boxW, bH:layerH, cols:layout.cols, rows:layout.rows
-  };
-
-  // Sync slider
-  const slider = document.getElementById('layerRange');
-  slider.max = Math.max(layers, 20);
-  slider.value = layers;
-  document.getElementById('layerVal').textContent = layers;
-
-  updateStats(lastResult);
-  draw();
+  lastR={lay,layers,total,stackH,totalH,totalWt,eff,bWtI,pmwI,pW,pD,bW,bL,bH,oh,ovhW,ovhL,ptH};
+  const sl=document.getElementById('lrange');
+  sl.max=Math.max(layers,20);sl.value=layers;
+  document.getElementById('lv').textContent=layers;
+  updStats(lastR);draw();
 }
 
-function updateStats(r){
-  const u = unitLabel(), w = weightLabel();
-  const dispH = unit==='cm' ? (r.totalH*IN_TO_CM).toFixed(1) : r.totalH.toFixed(1);
-  const dispWt = unit==='cm' ? convWeight(r.totalWt).toFixed(0) : r.totalWt.toFixed(0);
+function updStats(r){
+  const u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0),dH=toD(r.totalH).toFixed(1);
+  document.getElementById('r-tot').textContent=r.total;
+  document.getElementById('r-lay').textContent=r.layers;
+  document.getElementById('r-pl').textContent=r.lay.per||r.lay.per;
+  document.getElementById('r-wt').textContent=dWt;
+  document.getElementById('r-eff').textContent=r.eff+'%';
+  document.getElementById('eff-f').style.width=r.eff+'%';
 
-  document.getElementById('r-total').textContent = r.total;
-  document.getElementById('r-layers').textContent = r.layers;
-  document.getElementById('r-perlayer').textContent = r.layout.perLayer;
-  document.getElementById('r-weight').textContent = dispWt;
-  document.getElementById('r-eff').textContent = r.eff + '%';
-  document.getElementById('eff-fill').style.width = r.eff + '%';
+  // overlay
+  document.getElementById('ov-panel').style.display='block';
+  document.getElementById('ov-pl').textContent=r.lay.per;
+  document.getElementById('ov-sh').textContent=`${toD(r.stackH).toFixed(1)} ${u}`;
+  document.getElementById('ov-wt').textContent=`${dWt} ${w}`;
+  const ohr=document.getElementById('ov-oh-row');
+  if(r.oh>0){ohr.style.display='flex';document.getElementById('ov-oh').textContent=`${toD(r.oh).toFixed(1)} ${u}`;}
+  else ohr.style.display='none';
 
-  // Overlay
-  document.getElementById('info-overlay').style.display = 'block';
-  document.getElementById('ov-perlayer').textContent = r.layout.perLayer;
-  document.getElementById('ov-height').textContent = `${dispH} ${u}`;
-  document.getElementById('ov-weight').textContent = `${dispWt} ${w}`;
+  // weight warn
+  const wb=document.getElementById('w-wt');
+  if(r.bWtI>0&&r.pmwI>0&&r.totalWt>r.pmwI){
+    const ov=wD(r.totalWt-r.pmwI).toFixed(0);
+    wb.style.display='flex';document.getElementById('w-wt-t').textContent=`Exceeds capacity by ${ov} ${w}`;
+  } else wb.style.display='none';
 
-  // Weight warning
-  const warn = document.getElementById('warn-weight');
-  if(r.bWt > 0 && r.palMaxW > 0 && r.totalWt > r.palMaxW){
-    warn.style.display = 'flex';
-    const over = unit==='cm'
-      ? ((r.totalWt - r.palMaxW)*0.453592).toFixed(0)
-      : (r.totalWt - r.palMaxW).toFixed(0);
-    document.getElementById('warn-text').textContent = `Exceeds capacity by ${over} ${w}`;
-  } else {
-    warn.style.display = 'none';
-  }
+  // overhang info
+  const oi=document.getElementById('ohinfo');
+  if(r.oh>0){
+    const aW=toD(r.ovhW).toFixed(1),aL=toD(r.ovhL).toFixed(1);
+    const allowed=toD(r.oh).toFixed(1);
+    oi.style.display='block';
+    oi.innerHTML=`Overhang allowed: ±${allowed} ${u}<br>Actual overhang: ${aW} ${u} (W) × ${aL} ${u} (L)`;
+  } else oi.style.display='none';
 
-  // Detail table
-  const dispBL = unit==='cm' ? (r.bL*IN_TO_CM).toFixed(1) : r.bL;
-  const dispBW = unit==='cm' ? (r.bW*IN_TO_CM).toFixed(1) : r.bW;
-  const dispBH = unit==='cm' ? (r.bH*IN_TO_CM).toFixed(1) : r.bH;
-  const dispPW = unit==='cm' ? (r.pW*IN_TO_CM).toFixed(1) : r.pW;
-  const dispPD = unit==='cm' ? (r.pD*IN_TO_CM).toFixed(1) : r.pD;
+  // mixed badge
+  const mixB=r.lay.mixed?`<span class="mix-badge">mixed: ${r.lay.desc}</span>`:'';
+  const layStr=r.lay.mixed?r.lay.desc:`${r.lay.cols||0} cols × ${r.lay.rows||0} rows`;
 
-  document.getElementById('detail-table').innerHTML = `
-    <tr><td>Layout (cols × rows)</td><td>${r.cols} × ${r.rows}</td></tr>
-    <tr><td>Box footprint (${u})</td><td>${dispBL} × ${dispBW}</td></tr>
-    <tr><td>Pallet footprint (${u})</td><td>${dispPW} × ${dispPD}</td></tr>
-    <tr><td>Stack height (${u})</td><td>${unit==='cm'?(r.stackH*IN_TO_CM).toFixed(1):r.stackH.toFixed(1)}</td></tr>
-    <tr><td>Total height (${u})</td><td>${unit==='cm'?(r.totalH*IN_TO_CM).toFixed(1):r.totalH.toFixed(1)}</td></tr>
-    <tr><td>Pallet weight (${w})</td><td>${dispWt}</td></tr>
-    <tr><td>Space efficiency</td><td>${r.eff}%</td></tr>
+  document.getElementById('dtbl').innerHTML=`
+    <tr><td>Layout${mixB}</td><td>${layStr}</td></tr>
+    <tr><td>Box W×L×H (${u})</td><td>${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)}</td></tr>
+    <tr><td>Pallet W×L (${u})</td><td>${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)}</td></tr>
+    <tr><td>Stack height (${u})</td><td>${toD(r.stackH).toFixed(1)}</td></tr>
+    <tr><td>Total height (${u})</td><td>${toD(r.totalH).toFixed(1)}</td></tr>
+    <tr><td>Total weight (${w})</td><td>${dWt}</td></tr>
+    <tr><td>Efficiency</td><td>${r.eff}%</td></tr>
   `;
 }
 
+// ── draw 3D
 function draw(){
-  if(!lastResult) return;
-  const r = lastResult;
+  if(!lastR)return;
+  const r=lastR;
+  boxGrp.clear();
+  buildPallet(r.pW,r.pD);
 
-  boxesGroup.clear();
-  buildPallet(r.pW, r.pD);
+  const op=parseFloat(document.getElementById('opRange').value)/100;
+  const tr=op<1;
+  const emAt=new THREE.LineBasicMaterial({color:0x000,transparent:true,opacity:.12});
 
-  const mats = makeBoxMats(r.bL, r.bW, r.bH);
-  const geo = new THREE.BoxGeometry(r.bL, r.bH, r.bW);
+  // THREE face order: +X right, -X left, +Y top, -Y bottom, +Z front, -Z back
+  const mats=[getFTex('right'),getFTex('left'),getFTex('top'),getFTex('bottom'),getFTex('front'),getFTex('back')]
+    .map(t=>new THREE.MeshStandardMaterial({map:t,roughness:.82,metalness:.04,transparent:tr,opacity:op}));
 
-  // Bevel-like: slightly smaller geometry for edge effect
-  const edgeGeo = new THREE.BoxGeometry(r.bL+0.05, r.bH+0.05, r.bW+0.05);
-  const edgeMat = new THREE.LineBasicMaterial({color:0x000000, transparent:true, opacity:0.12});
+  const baseY=ptop();
+  const ly=r.lay;
 
-  const startX = -(r.cols * r.bL)/2 + r.bL/2;
-  const startZ = -(r.rows * r.bW)/2 + r.bW/2;
-  const baseY = getPalletTop();
+  function placeBox(x,y,z,bx,bh,bz){
+    const g=new THREE.BoxGeometry(bx,bh,bz);
+    const m=new THREE.Mesh(g,mats);
+    m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bx+.04,bh+.04,bz+.04)),emAt));
+    boxGrp.add(m);
+  }
 
-  for(let l=0; l<r.layers; l++){
-    const yOff = baseY + l*r.bH + r.bH/2;
-    for(let c=0; c<r.cols; c++){
-      for(let row=0; row<r.rows; row++){
-        const x = startX + c*r.bL;
-        const z = startZ + row*r.bW;
-
-        const mesh = new THREE.Mesh(geo, mats);
-        mesh.position.set(x, yOff, z);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-
-        // Edge wireframe
-        const edges = new THREE.LineSegments(new THREE.EdgesGeometry(edgeGeo), edgeMat);
-        mesh.add(edges);
-
-        // Top highlight on top layer
-        if(l === r.layers-1){
-          const hlGeo = new THREE.PlaneGeometry(r.bL*0.92, r.bW*0.92);
-          const hlMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.07, side:THREE.DoubleSide});
-          const hl = new THREE.Mesh(hlGeo, hlMat);
-          hl.rotation.x = -Math.PI/2;
-          hl.position.y = r.bH/2 + 0.05;
-          mesh.add(hl);
-        }
-
-        boxesGroup.add(mesh);
+  for(let l=0;l<r.layers;l++){
+    const yOff=baseY+l*ly.lH+ly.lH/2;
+    if(ly.mixed){
+      const sXA=-r.pW/2;
+      for(let c=0;c<(ly.cA||0);c++){
+        const x=sXA+c*ly.bXA+ly.bXA/2;
+        const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
+        for(let row=0;row<(ly.rA||0);row++) placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA);
       }
+      const sXB=-r.pW/2+(ly.cA||0)*ly.bXA;
+      for(let c=0;c<(ly.cB||0);c++){
+        const x=sXB+c*ly.bXB+ly.bXB/2;
+        const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
+        for(let row=0;row<(ly.rB||0);row++) placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB);
+      }
+    } else {
+      const cols=ly.cols||0,rows=ly.rows||0;
+      const sX=-(cols*ly.bX)/2+ly.bX/2;
+      const sZ=-(rows*ly.bZ)/2+ly.bZ/2;
+      for(let c=0;c<cols;c++)
+        for(let row=0;row<rows;row++)
+          placeBox(sX+c*ly.bX,yOff,sZ+row*ly.bZ,ly.bX,ly.lH,ly.bZ);
     }
+  }
+
+  // overhang guides
+  if(r.oh>0){
+    const om=new THREE.MeshBasicMaterial({color:0x1a6aff,transparent:true,opacity:.1,side:THREE.DoubleSide});
+    const y2=baseY+r.stackH/2, h2=r.stackH;
+    [[r.oh,h2,-(r.pW/2+r.oh/2),y2,0,0,0,0],[r.oh,h2,r.pW/2+r.oh/2,y2,0,0,0,0]].forEach(([w,hh,x,y,z])=>{
+      const m=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),om);m.position.set(x,y,z);boxGrp.add(m);
+    });
   }
 }
 
-// ─── Export / Copy ────────────────────────────────────────────────────────────
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
+// ── three init
+function initThree(){
+  scene=new THREE.Scene();
+  const wrap=document.getElementById('cv-wrap'),W=wrap.clientWidth,H=wrap.clientHeight;
+  cam=new THREE.PerspectiveCamera(40,W/H,.1,5000);cam.position.set(140,110,140);
+  rnd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  rnd.setSize(W,H);rnd.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  rnd.shadowMap.enabled=true;rnd.shadowMap.type=THREE.PCFSoftShadowMap;
+  rnd.toneMapping=THREE.ACESFilmicToneMapping;rnd.toneMappingExposure=1.05;
+  wrap.appendChild(rnd.domElement);
+
+  ctrl=new THREE.OrbitControls(cam,rnd.domElement);
+  ctrl.enableDamping=true;ctrl.dampingFactor=.07;
+  ctrl.maxPolarAngle=Math.PI/1.88;ctrl.minDistance=15;ctrl.maxDistance=800;
+
+  scene.add(new THREE.AmbientLight(0xffffff,.65));
+  const sun=new THREE.DirectionalLight(0xfff5e8,1.0);sun.position.set(100,180,80);sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-180;sun.shadow.camera.right=180;sun.shadow.camera.top=180;sun.shadow.camera.bottom=-180;
+  sun.shadow.bias=-.001;scene.add(sun);
+  const fl=new THREE.DirectionalLight(0xcce8ff,.3);fl.position.set(-80,60,-80);scene.add(fl);
+
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),new THREE.ShadowMaterial({opacity:.1}));
+  gnd.rotation.x=-Math.PI/2;gnd.position.y=-.5;gnd.receiveShadow=true;scene.add(gnd);
+
+  boxGrp=new THREE.Group();palGrp=new THREE.Group();mainGrp=new THREE.Group();
+  mainGrp.add(palGrp);mainGrp.add(boxGrp);scene.add(mainGrp);
+
+  window.addEventListener('resize',()=>{const cW=wrap.clientWidth,cH=wrap.clientHeight;cam.aspect=cW/cH;cam.updateProjectionMatrix();rnd.setSize(cW,cH);});
+  (function loop(){requestAnimationFrame(loop);ctrl.update();rnd.render(scene,cam);})();
 }
 
-function copyResults(){
-  if(!lastResult) return;
-  const r = lastResult;
-  const u = unitLabel(), w = weightLabel();
-  const dispWt = unit==='cm' ? convWeight(r.totalWt).toFixed(0) : r.totalWt.toFixed(0);
-  const text = [
-    'PALLET LOAD CALCULATOR — RESULTS',
-    '──────────────────────────────────',
-    `Total boxes:       ${r.total}`,
-    `Layers:            ${r.layers}`,
-    `Boxes per layer:   ${r.layout.perLayer}`,
-    `Layout:            ${r.cols} cols × ${r.rows} rows`,
-    `Stack height:      ${unit==='cm'?(r.stackH*IN_TO_CM).toFixed(1):r.stackH.toFixed(1)} ${u}`,
-    `Total height:      ${unit==='cm'?(r.totalH*IN_TO_CM).toFixed(1):r.totalH.toFixed(1)} ${u}`,
-    `Total weight:      ${dispWt} ${w}`,
-    `Space efficiency:  ${r.eff}%`,
-  ].join('\n');
-  navigator.clipboard.writeText(text).then(()=>showToast('Results copied to clipboard'));
+function setCam(t){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('c-'+t).classList.add('on');
+  const box=new THREE.Box3().setFromObject(mainGrp),c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
+  const d=Math.max(s.x,s.y,s.z)*1.9;ctrl.target.copy(c);
+  if(t==='iso')cam.position.set(c.x+d*.75,c.y+d*.65,c.z+d*.75);
+  if(t==='top')cam.position.set(c.x,c.y+d*1.5,c.z+.01);
+  if(t==='front')cam.position.set(c.x,c.y+s.y*.25,c.z+d*1.3);
+  if(t==='side')cam.position.set(c.x+d*1.3,c.y+s.y*.25,c.z);
+  ctrl.update();
 }
 
+// ── export
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200);}
+
+function copyR(){
+  if(!lastR)return;
+  const r=lastR,u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
+  navigator.clipboard.writeText([
+    'PALLET LOAD CALCULATOR','─────────────────────',
+    `Total boxes:    ${r.total}`,`Layers:         ${r.layers}`,`Per layer:      ${r.lay.per}`,
+    `Stack height:   ${toD(r.stackH).toFixed(1)} ${u}`,`Total height:   ${toD(r.totalH).toFixed(1)} ${u}`,
+    `Total weight:   ${dWt} ${w}`,`Efficiency:     ${r.eff}%`,
+  ].join('\n')).then(()=>toast('Copied!'));
+}
 function exportCSV(){
-  if(!lastResult) return;
-  const r = lastResult;
-  const u = unitLabel(), w = weightLabel();
-  const dispWt = unit==='cm' ? convWeight(r.totalWt).toFixed(0) : r.totalWt.toFixed(0);
-  const rows = [
-    ['Parameter','Value','Unit'],
-    ['Total boxes', r.total, ''],
-    ['Layers', r.layers, ''],
-    ['Boxes per layer', r.layout.perLayer, ''],
-    ['Columns', r.cols, ''],
-    ['Rows', r.rows, ''],
-    ['Stack height', (unit==='cm'?(r.stackH*IN_TO_CM).toFixed(1):r.stackH.toFixed(1)), u],
-    ['Total height', (unit==='cm'?(r.totalH*IN_TO_CM).toFixed(1):r.totalH.toFixed(1)), u],
-    ['Total weight', dispWt, w],
-    ['Space efficiency', r.eff, '%'],
-    ['Pallet W', (unit==='cm'?(r.pW*IN_TO_CM).toFixed(1):r.pW), u],
-    ['Pallet D', (unit==='cm'?(r.pD*IN_TO_CM).toFixed(1):r.pD), u],
-    ['Box L', (unit==='cm'?(r.bL*IN_TO_CM).toFixed(1):r.bL), u],
-    ['Box W', (unit==='cm'?(r.bW*IN_TO_CM).toFixed(1):r.bW), u],
-    ['Box H', (unit==='cm'?(r.bH*IN_TO_CM).toFixed(1):r.bH), u],
-  ];
-  const csv = rows.map(r=>r.join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'pallet-load.csv';
-  a.click();
-  showToast('CSV exported');
+  if(!lastR)return;
+  const r=lastR,u=ul(),w=wl(),dWt=wD(r.totalWt).toFixed(0);
+  const rows=[['Parameter','Value','Unit'],['Total boxes',r.total,''],['Layers',r.layers,''],
+    ['Per layer',r.lay.per,''],['Stack height',toD(r.stackH).toFixed(1),u],
+    ['Total height',toD(r.totalH).toFixed(1),u],['Weight',dWt,w],['Efficiency',r.eff+'%',''],
+    ['Box W×L×H',`${toD(r.bW).toFixed(1)}×${toD(r.bL).toFixed(1)}×${toD(r.bH).toFixed(1)}`,u],
+    ['Pallet W×L',`${toD(r.pW).toFixed(1)}×${toD(r.pD).toFixed(1)}`,u]];
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));a.download='pallet.csv';a.click();toast('CSV saved');
 }
-
 function exportPNG(){
-  renderer.setClearColor(0x000000, 0);
-  renderer.render(scene, camera);
-  renderer.domElement.toBlob(blob => {
-    if(navigator.clipboard && window.ClipboardItem){
-      navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
-        .then(()=>showToast('PNG copied to clipboard!'))
-        .catch(()=>downloadBlob(blob));
-    } else {
-      downloadBlob(blob);
-    }
+  rnd.setClearColor(0,0);rnd.render(scene,cam);
+  rnd.domElement.toBlob(blob=>{
+    if(navigator.clipboard&&window.ClipboardItem)navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(()=>toast('PNG copied!')).catch(()=>dlb(blob));
+    else dlb(blob);
   });
-  renderer.setClearColor(0x000000,1);
 }
+function dlb(blob){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='pallet.png';a.click();URL.revokeObjectURL(u);toast('PNG saved');}
 
-function downloadBlob(blob){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'pallet-3d.png'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('PNG downloaded');
-}
-
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
-initThree();
-calc();
+initThree();updPP();calc();
 </script>
 </body>
 </html>
