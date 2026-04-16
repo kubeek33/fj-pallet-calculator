@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pallet Load Calculator Pro</title>
+<title>Forjars Pallet Calculator</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -116,6 +116,10 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 .cb:hover{background:#fff;color:#111}
 .cb.on{background:var(--accent);border-color:var(--accent);color:#fff}
 
+.cat-panel{position:absolute;top:11px;right:11px;z-index:5}
+.cat-panel select{height:30px;border:1px solid rgba(0,0,0,.15);border-radius:var(--r);background:rgba(255,255,255,.88);color:#444;font-size:11px;font-weight:600;padding:0 8px;cursor:pointer;outline:none;min-width:200px;font-family:inherit}
+.cat-panel select:focus{border-color:var(--accent);background:#fff}
+
 .ov-panel{position:absolute;bottom:11px;right:11px;background:rgba(255,255,255,.93);border:1px solid rgba(0,0,0,.1);border-radius:var(--r);padding:8px 11px;font-size:11px;color:var(--text2)}
 .ov-panel div{margin-bottom:2px;display:flex;justify-content:space-between;gap:16px}
 .ov-panel div:last-child{margin:0}
@@ -132,14 +136,22 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 .ah-wrap .f{flex:1}
 .ah-tog{height:28px;padding:0 7px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;align-self:flex-end}
 .ah-tog.on{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+
+.var-list{max-height:120px;overflow-y:auto;margin-top:5px;display:flex;flex-direction:column;gap:3px}
+.var-list::-webkit-scrollbar{width:3px}
+.var-list::-webkit-scrollbar-thumb{background:var(--border2)}
+.var-btn{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;font-size:10px;transition:all .12s;text-align:left}
+.var-btn:hover{background:var(--bg3);border-color:var(--border2)}
+.var-btn.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.var-btn .vn{font-weight:700}.var-btn .vp{font-weight:800;white-space:nowrap}
 </style>
 </head>
 <body>
 
 <div id="sidebar">
   <div class="sid-head">
-    <h1>Pallet Load Calculator</h1>
-    <p>Professional 3D stacking tool</p>
+    <h1>Forjars Pallet Calculator</h1>
+    <p>Product pallet stacking tool</p>
     <div class="unit-bar">
       <button id="b-in" class="on" onclick="setUnit('in')">INCHES</button>
       <button id="b-cm" onclick="setUnit('cm')">CENTIMETRES</button>
@@ -189,12 +201,15 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
       <label>Orientation</label>
       <div class="ob-grid">
         <button class="ob on" id="ob-auto" onclick="setOrient('auto')">Auto best</button>
+        <button class="ob" id="ob-interlock" onclick="setOrient('interlock')">Interlock</button>
         <button class="ob" id="ob-mixed" onclick="setOrient('mixed')">Mixed rows</button>
         <button class="ob" id="ob-flat" onclick="setOrient('flat')">W×L flat</button>
         <button class="ob" id="ob-rot" onclick="setOrient('rot')">L×W rotated</button>
       </div>
+      <div id="var-list" class="var-list" style="display:none"></div>
     </div>
-    <div class="g2">
+    <div class="g3">
+      <div class="f"><label>Per layer</label><input type="number" id="perLayer" value="0" min="0" step="1" oninput="selVar=-1;calc()" title="0 = auto"></div>
       <div class="f">
         <label>Layers: <strong id="lv" style="color:var(--accent)">5</strong></label>
         <input type="range" id="lrange" min="1" max="20" value="5" oninput="lslide(this)">
@@ -207,14 +222,15 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
   <div class="sec">
     <div class="st">Box design</div>
     <div class="g2" style="margin-bottom:6px">
-      <div class="f"><label>Box colour</label><input type="color" id="boxCol" value="#d4a96a" oninput="clrTexCache();draw()"></div>
-      <div class="f"><label>Tape colour</label><input type="color" id="tapeCol" value="#d4161a" oninput="clrTexCache();draw()"></div>
+      <div class="f"><label>Box colour</label><input type="color" id="boxCol" value="#e2943c" oninput="clrTexCache();draw()"></div>
+      <div class="f"><label>Tape colour</label><input type="color" id="tapeCol" value="#ffffff" oninput="clrTexCache();draw()"></div>
     </div>
     <div class="f" style="margin-bottom:6px">
       <label>Opacity: <strong id="opv">95</strong>%</label>
       <input type="range" id="opRange" min="20" max="100" value="95" step="1" oninput="opslide(this)">
     </div>
     <div class="tog-row" style="margin-bottom:7px">
+      <button class="tog on" id="tog-mir" onclick="toggleMirror()">Mirror layers</button>
       <button class="tog" id="tog-mul" onclick="toggleMultiply()">Multiply blend</button>
       <button class="tog on" id="tog-shd" onclick="toggleShadow()">Shadow</button>
     </div>
@@ -304,6 +320,11 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     <button class="cb" id="c-front" onclick="setCam('front')">FRONT</button>
     <button class="cb" id="c-side" onclick="setCam('side')">SIDE</button>
   </div>
+  <div class="cat-panel">
+    <select id="catSel" onchange="loadProduct(parseInt(this.value))">
+      <option value="-1">— Select product —</option>
+    </select>
+  </div>
   <div class="ov-panel" id="ov-panel" style="display:none">
     <div>Per layer <span id="ov-pl">—</span></div>
     <div>Stack height <span id="ov-sh">—</span></div>
@@ -320,7 +341,8 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 <script>
 // ── state
 let unit='in', orient='auto', activeFace='front', autoH=false;
-let useMultiply=false, showShadow=true;
+let useMultiply=false, showShadow=true, useMirror=true, selVar=-1;
+let interlockVars=[];
 let fImgData={front:null,back:null,left:null,right:null,top:null,bottom:null};
 let fImgEls={front:null,back:null,left:null,right:null,top:null,bottom:null};
 let fTexCache={}; // keyed as 'face_dir' e.g. 'top_v', 'front_h'
@@ -377,9 +399,28 @@ function setPP(i){
   calc();toast(`Preset: ${p.n}`);
 }
 function setOrient(o){
-  orient=o;
-  ['auto','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));
+  orient=o;selVar=-1;
+  ['auto','interlock','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));
+  if(o==='interlock'&&!useMirror){useMirror=true;document.getElementById('tog-mir').classList.add('on');}
+  document.getElementById('var-list').style.display=o==='interlock'?'flex':'none';
   calc();
+}
+function pickVar(i){
+  selVar=i;
+  document.querySelectorAll('.var-btn').forEach((b,j)=>b.classList.toggle('on',j===i));
+  calc();
+}
+function _renderVars(){
+  const el=document.getElementById('var-list');
+  el.innerHTML='';
+  interlockVars.forEach((v,i)=>{
+    const b=document.createElement('div');
+    b.className='var-btn'+(i===selVar?' on':'');
+    const label=v.mixed?v.desc:`${v.label} ${v.cols}×${v.rows}`;
+    b.innerHTML=`<span class="vn">${label}</span><span class="vp">${v.per}/layer</span>`;
+    b.onclick=()=>pickVar(i);
+    el.appendChild(b);
+  });
 }
 function lslide(el){
   document.getElementById('lv').textContent=el.value;
@@ -402,6 +443,11 @@ function toggleAutoH(){
   inp.style.opacity=autoH?'0.5':'1';
   if(autoH)lslide(document.getElementById('lrange'));
   else calc();
+}
+function toggleMirror(){
+  useMirror=!useMirror;
+  document.getElementById('tog-mir').classList.toggle('on',useMirror);
+  draw();
 }
 function toggleMultiply(){
   useMultiply=!useMultiply;
@@ -548,8 +594,59 @@ function buildPallet(pW,pD){
 function ptop(){return palGrp.userData.topY||PTOPH;}
 
 // ── layout engine (enhanced with row mixing)
-function calcLayout(pW,pD,bW,bL,bH,oh,mode){
+function calcLayout(pW,pD,bW,bL,bH,oh,mode,perLayer){
   const eW=pW+oh*2,eD=pD+oh*2;
+
+  // ── manual per-layer override: find best arrangement closest to target
+  if(perLayer>0){
+    let best=null,bestDiff=Infinity;
+
+    // try all pure flat cols×rows
+    const maxCF=Math.floor(eW/bW),maxRF=Math.floor(eD/bL);
+    for(let c=1;c<=maxCF;c++)for(let r=1;r<=maxRF;r++){
+      const per=c*r,diff=Math.abs(per-perLayer);
+      if(diff<bestDiff||(diff===bestDiff&&per>(best?best.per:0))){
+        bestDiff=diff;best={cols:c,rows:r,bX:bW,bZ:bL,lH:bH,per,label:'flat',mixed:false};
+      }
+    }
+    // try all pure rotated cols×rows
+    const maxCR=Math.floor(eW/bL),maxRR=Math.floor(eD/bW);
+    for(let c=1;c<=maxCR;c++)for(let r=1;r<=maxRR;r++){
+      const per=c*r,diff=Math.abs(per-perLayer);
+      if(diff<bestDiff||(diff===bestDiff&&per>(best?best.per:0))){
+        bestDiff=diff;best={cols:c,rows:r,bX:bL,bZ:bW,lH:bH,per,label:'rotated',mixed:false};
+      }
+    }
+
+    // try mixed row combos (for interlock / auto / mixed)
+    if(mode!=='flat'&&mode!=='rot'){
+      const cF=Math.floor(eW/bW),cR=Math.floor(eW/bL);
+      for(let nF=1;nF<=Math.floor(eD/bL);nF++){
+        const maxNR=Math.floor((eD-nF*bL)/bW);
+        for(let nR=1;nR<=maxNR;nR++){
+          const per=nF*cF+nR*cR,diff=Math.abs(per-perLayer);
+          if(diff<bestDiff||(diff===bestDiff&&per>(best?best.per:0))){
+            bestDiff=diff;best={mixed:true,mixType:'rows',per,lH:bH,rFlat:nF,cFlat:cF,bXFlat:bW,bZFlat:bL,rRot:nR,cRot:cR,bXRot:bL,bZRot:bW,desc:`${nF}×${cF}+${nR}×${cR}rot`};
+          }
+        }
+      }
+      // try mixed col combos
+      for(let cA=1;cA<=Math.floor(eW/bW);cA++){
+        const cB=Math.floor((eW-cA*bW)/bL);
+        if(cB<1)continue;
+        const rA=Math.floor(eD/bL),rB=Math.floor(eD/bW);
+        const per=cA*rA+cB*rB,diff=Math.abs(per-perLayer);
+        if(diff<bestDiff||(diff===bestDiff&&per>(best?best.per:0))){
+          bestDiff=diff;best={mixed:true,mixType:'cols',per,lH:bH,cA,rA,bXA:bW,bZA:bL,cB,rB,bXB:bL,bZB:bW,desc:`${cA}×${rA}+${cB}×${rB}rot`};
+        }
+      }
+    }
+
+    if(best)return best;
+    return{cols:0,rows:0,bX:bW,bZ:bL,lH:bH,per:0,label:'none',mixed:false};
+  }
+
+  // ── auto per-row
   // A=flat(bW×bL footprint), B=rotated(bL×bW footprint)
   const A={cols:Math.floor(eW/bW),rows:Math.floor(eD/bL),bX:bW,bZ:bL,lH:bH,label:'flat',mixed:false};
   A.per=A.cols*A.rows;
@@ -595,6 +692,41 @@ function calcLayout(pW,pD,bW,bL,bH,oh,mode){
     return best;
   }
 
+  if(mode==='interlock'){
+    // collect ALL valid interlock variants (both orientations present)
+    interlockVars=[];
+    const seen=new Set();
+    // col splits — cA>=1 && cB>=1
+    for(let cA=1;cA<=Math.floor(eW/bW);cA++){
+      const cB=Math.floor((eW-cA*bW)/bL);
+      if(cB<1)continue;
+      const per=cA*A.rows+cB*B.rows;
+      const key=`c${cA}_${cB}`;
+      if(seen.has(key))continue;seen.add(key);
+      interlockVars.push({mixed:true,mixType:'cols',per,lH:bH,cA,rA:A.rows,bXA:bW,bZA:bL,cB,rB:B.rows,bXB:bL,bZB:bW,desc:`${cA}col×${A.rows} + ${cB}col×${B.rows}rot`});
+    }
+    // row splits — rFlat>=1 && rRot>=1
+    const cFlatI=Math.floor(eW/bW),cRotI=Math.floor(eW/bL);
+    for(let rFlat=1;rFlat<=Math.floor(eD/bL);rFlat++){
+      const rRot=Math.floor((eD-rFlat*bL)/bW);
+      if(rRot<1)continue;
+      const per=rFlat*cFlatI+rRot*cRotI;
+      const key=`r${rFlat}_${rRot}`;
+      if(seen.has(key))continue;seen.add(key);
+      interlockVars.push({mixed:true,mixType:'rows',per,lH:bH,rFlat,cFlat:cFlatI,bXFlat:bW,bZFlat:bL,rRot,cRot:cRotI,bXRot:bL,bZRot:bW,desc:`${rFlat}row×${cFlatI} + ${rRot}row×${cRotI}rot`});
+    }
+    // also include pure layouts as options
+    if(A.per>0)interlockVars.push(A);
+    if(B.per>0&&B.per!==A.per)interlockVars.push(B);
+    // sort by per descending
+    interlockVars.sort((a,b)=>b.per-a.per);
+    _renderVars();
+    // return selected or best
+    if(selVar>=0&&selVar<interlockVars.length)return interlockVars[selVar];
+    if(interlockVars.length)return interlockVars[0];
+    return A.per>=B.per?A:B;
+  }
+
   if(mode==='mixed'){
     const mx=bestMixed();
     const pureBest=A.per>=B.per?A:B;
@@ -624,14 +756,15 @@ function calc(){
   const pmwI=unit==='cm'?pmwRaw/0.453592:pmwRaw;
   if(!pW||!pD||!bW||!bL||!bH)return;
 
-  const lay=calcLayout(pW,pD,bW,bL,bH,oh,orient);
+  const perLayer=parseInt(document.getElementById('perLayer').value)||0;
+  const lay=calcLayout(pW,pD,bW,bL,bH,oh,orient,perLayer);
   const ptH=ptop();
   const maxLH=Math.max(1,Math.floor((maxH-ptH)/lay.lH));
   const layers=autoH?Math.min(maxLay,999):Math.min(maxLay,maxLH);
   const total=lay.per*layers;
   const stackH=layers*lay.lH;
   const totalH=ptH+stackH;
-  const totalWt=total*bWtI+45;
+  const totalWt=total*bWtI+30;
   const eff=Math.round(Math.min(100,(total*bW*bL*bH)/(pW*pD*Math.max(totalH,1))*100));
 
   // margin calc (non-mixed only)
@@ -751,33 +884,64 @@ function draw(){
 
   for(let l=0;l<r.layers;l++){
     const yOff=baseY+l*ly.lH+ly.lH/2;
+    const mir=useMirror&&l%2===1; // mirror odd layers
     if(ly.mixed){
       if(ly.mixType==='cols'){
         const totalX=(ly.cA||0)*ly.bXA+(ly.cB||0)*ly.bXB;
         const sXA=-totalX/2;
-        for(let c=0;c<(ly.cA||0);c++){
-          const x=sXA+c*ly.bXA+ly.bXA/2;
-          const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
-          for(let row=0;row<(ly.rA||0);row++) placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA,matsMain);
-        }
-        const sXB=sXA+(ly.cA||0)*ly.bXA;
-        for(let c=0;c<(ly.cB||0);c++){
-          const x=sXB+c*ly.bXB+ly.bXB/2;
-          const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
-          for(let row=0;row<(ly.rB||0);row++) placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB,matsAlt);
+        // normal: zone A left, zone B right; mirrored: zone B left, zone A right
+        if(!mir){
+          for(let c=0;c<(ly.cA||0);c++){
+            const x=sXA+c*ly.bXA+ly.bXA/2;
+            const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
+            for(let row=0;row<(ly.rA||0);row++) placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA,matsMain);
+          }
+          const sXB=sXA+(ly.cA||0)*ly.bXA;
+          for(let c=0;c<(ly.cB||0);c++){
+            const x=sXB+c*ly.bXB+ly.bXB/2;
+            const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
+            for(let row=0;row<(ly.rB||0);row++) placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB,matsAlt);
+          }
+        } else {
+          const sXB2=-totalX/2;
+          for(let c=0;c<(ly.cB||0);c++){
+            const x=sXB2+c*ly.bXB+ly.bXB/2;
+            const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
+            for(let row=0;row<(ly.rB||0);row++) placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB,matsAlt);
+          }
+          const sXA2=sXB2+(ly.cB||0)*ly.bXB;
+          for(let c=0;c<(ly.cA||0);c++){
+            const x=sXA2+c*ly.bXA+ly.bXA/2;
+            const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
+            for(let row=0;row<(ly.rA||0);row++) placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA,matsMain);
+          }
         }
       } else {
         const totalZ=(ly.rFlat||0)*ly.bZFlat+(ly.rRot||0)*ly.bZRot;
         const sZStart=-totalZ/2;
-        const sXFlat=-(ly.cFlat*ly.bXFlat)/2+ly.bXFlat/2;
-        for(let row=0;row<(ly.rFlat||0);row++){
-          const z=sZStart+row*ly.bZFlat+ly.bZFlat/2;
-          for(let c=0;c<ly.cFlat;c++) placeBox(sXFlat+c*ly.bXFlat,yOff,z,ly.bXFlat,ly.lH,ly.bZFlat,matsMain);
-        }
-        const sXRot=-(ly.cRot*ly.bXRot)/2+ly.bXRot/2;
-        for(let row=0;row<(ly.rRot||0);row++){
-          const z=sZStart+(ly.rFlat||0)*ly.bZFlat+row*ly.bZRot+ly.bZRot/2;
-          for(let c=0;c<ly.cRot;c++) placeBox(sXRot+c*ly.bXRot,yOff,z,ly.bXRot,ly.lH,ly.bZRot,matsAlt);
+        // normal: flat front, rot back; mirrored: rot front, flat back
+        if(!mir){
+          const sXFlat=-(ly.cFlat*ly.bXFlat)/2+ly.bXFlat/2;
+          for(let row=0;row<(ly.rFlat||0);row++){
+            const z=sZStart+row*ly.bZFlat+ly.bZFlat/2;
+            for(let c=0;c<ly.cFlat;c++) placeBox(sXFlat+c*ly.bXFlat,yOff,z,ly.bXFlat,ly.lH,ly.bZFlat,matsMain);
+          }
+          const sXRot=-(ly.cRot*ly.bXRot)/2+ly.bXRot/2;
+          for(let row=0;row<(ly.rRot||0);row++){
+            const z=sZStart+(ly.rFlat||0)*ly.bZFlat+row*ly.bZRot+ly.bZRot/2;
+            for(let c=0;c<ly.cRot;c++) placeBox(sXRot+c*ly.bXRot,yOff,z,ly.bXRot,ly.lH,ly.bZRot,matsAlt);
+          }
+        } else {
+          const sXRot=-(ly.cRot*ly.bXRot)/2+ly.bXRot/2;
+          for(let row=0;row<(ly.rRot||0);row++){
+            const z=sZStart+row*ly.bZRot+ly.bZRot/2;
+            for(let c=0;c<ly.cRot;c++) placeBox(sXRot+c*ly.bXRot,yOff,z,ly.bXRot,ly.lH,ly.bZRot,matsAlt);
+          }
+          const sXFlat=-(ly.cFlat*ly.bXFlat)/2+ly.bXFlat/2;
+          for(let row=0;row<(ly.rFlat||0);row++){
+            const z=sZStart+(ly.rRot||0)*ly.bZRot+row*ly.bZFlat+ly.bZFlat/2;
+            for(let c=0;c<ly.cFlat;c++) placeBox(sXFlat+c*ly.bXFlat,yOff,z,ly.bXFlat,ly.lH,ly.bZFlat,matsMain);
+          }
         }
       }
     } else {
@@ -989,7 +1153,86 @@ function exportPNG(){
 }
 function dlb(blob){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='pallet.png';a.click();URL.revokeObjectURL(u);toast('PNG saved');}
 
-initThree();updPP();calc();
+// ── product catalog
+const CATALOG=[
+  {cat:'Wide Mouth',name:'12 Lids Wide',sku:'FJ-LW-12',bW:13,bL:7.5,bH:4,wt:7.3,pW:48,pD:40,mH:66,layers:15},
+  {cat:'Wide Mouth',name:'50 Lids Wide',sku:'FJ-LW-50',bW:19,bL:15,bH:8.5,wt:44,pW:48,pD:40,mH:65,layers:7},
+  {cat:'Wide Mouth',name:'100 Lids Wide',sku:'FJ-LW-100',bW:19,bL:15,bH:8.5,wt:44.4,pW:48,pD:40,mH:65,layers:7},
+  {cat:'Wide Mouth',name:'12 Lids & Rings Wide',sku:'FJ-LRW-12',bW:19,bL:15,bH:7,wt:15.5,pW:48,pD:40,mH:69,layers:9},
+  {cat:'Wide Mouth',name:'24 Lids & Rings Wide',sku:'FJ-LRW-24',bW:20,bL:13.5,bH:15,wt:29.5,pW:48,pD:40,mH:66,layers:4},
+  {cat:'Regular Mouth',name:'12 Lids Regular',sku:'FJ-LR-12',bW:12.5,bL:6.5,bH:3.5,wt:4.9,pW:48,pD:40,mH:60,layers:15},
+  {cat:'Regular Mouth',name:'50 Lids Regular',sku:'FJ-LR-50',bW:16,bL:12,bH:8.5,wt:30.8,pW:48,pD:40,mH:65,layers:7},
+  {cat:'Regular Mouth',name:'100 Lids Regular',sku:'FJ-LR-100',bW:15.5,bL:12.5,bH:8.5,wt:30.3,pW:48,pD:40,mH:65,layers:7},
+  {cat:'Regular Mouth',name:'12 Lids & Rings Regular',sku:'FJ-LRR-12',bW:16,bL:12,bH:7,wt:10.5,pW:48,pD:40,mH:69,layers:9},
+  {cat:'Regular Mouth',name:'24 Lids & Rings Regular',sku:'FJ-LRR-24',bW:16,bL:13,bH:12.5,wt:19.8,pW:48,pD:40,mH:69,layers:5},
+  {cat:'Gem Mouth',name:'50 Lids Gem',sku:'FJ-LG-50',bW:16,bL:12,bH:8.5,wt:35.7,pW:48,pD:40,mH:63,layers:7},
+  {cat:'Rings',name:'100 Rings Gem',sku:'FJ-CB-G100',bW:17,bL:6.5,bH:8.5,wt:3.4,pW:48,pD:40,mH:65,layers:7},
+  {cat:'Rings',name:'100 Rings Regular',sku:'FJ-RB-100',bW:15.5,bL:5.5,bH:6.5,wt:2.2,pW:48,pD:40,mH:67,layers:10},
+  {cat:'Rings',name:'100 Rings Wide',sku:'FJ-RW-100',bW:18,bL:6,bH:7.5,wt:3.2,pW:48,pD:40,mH:65,layers:8},
+  {cat:'Accessories',name:'Kitchen Timer',sku:'FKT-SS',bW:17.5,bL:15,bH:14,wt:37,pW:48,pD:40,mH:61,layers:4},
+  {cat:'Accessories',name:'Pressure Canner',sku:'FJ-PC23L',bW:16,bL:16,bH:16,wt:17,pW:48,pD:40,mH:86,layers:5},
+  {cat:'Accessories',name:'Funnel Set',sku:'FJ-FS',bW:14,bL:14,bH:22,wt:25.7,pW:48,pD:40,mH:70,layers:3},
+  {cat:'Vacuum Sealer',name:'VS Pro Machine',sku:'FJ-VSM',bW:18.5,bL:11,bH:20.5,wt:34.5,pW:48,pD:40,mH:67,layers:6},
+  {cat:'Jars',name:'Mason 4oz/12 Regular',sku:'FMJ-4oz-12-R',bW:13,bL:10,bH:3,wt:4.3,pW:48,pD:40,mH:61,layers:20},
+  {cat:'Jars',name:'Mason 8oz/12 Regular',sku:'FMJ-8oz-12-R',bW:13,bL:10,bH:5,wt:6.9,pW:48,pD:40,mH:66,layers:13},
+  {cat:'Jars',name:'Mason 16oz/12 Wide',sku:'FMJ-16oz-12-W',bW:15,bL:11.5,bH:5.5,wt:9.2,pW:48,pD:40,mH:66,layers:11},
+  {cat:'Jars',name:'Mason 16oz/12 Regular',sku:'FMJ-16oz-12-R',bW:15,bL:11.5,bH:6,wt:9.2,pW:48,pD:40,mH:66,layers:11},
+  {cat:'Jars',name:'Mason 32oz/12 Regular',sku:'FMJ-32oz-12-R',bW:17.5,bL:13.5,bH:8,wt:15.2,pW:48,pD:40,mH:64,layers:8},
+  {cat:'Jars',name:'Mason 32oz/12 Wide',sku:'FMJ-32oz-12-W',bW:17,bL:13,bH:7.5,wt:15.2,pW:48,pD:40,mH:64,layers:8},
+  {cat:'Jars',name:'Mason 64oz/6 Wide',sku:'FMJ-64oz-6-W',bW:16,bL:11,bH:10.5,wt:13.4,pW:48,pD:40,mH:68,layers:6},
+];
+
+function initCatalog(){
+  const sel=document.getElementById('catSel');
+  let lastCat='',grp;
+  CATALOG.forEach((p,i)=>{
+    if(p.cat!==lastCat){
+      grp=document.createElement('optgroup');
+      grp.label=p.cat;
+      sel.appendChild(grp);
+      lastCat=p.cat;
+    }
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=`${p.name} (${p.sku})`;
+    grp.appendChild(opt);
+  });
+}
+
+function loadProduct(idx){
+  if(idx<0)return;
+  const p=CATALOG[idx];
+  if(unit==='cm'){
+    document.getElementById('boxW').value=+(p.bW*IC).toFixed(1);
+    document.getElementById('boxL').value=+(p.bL*IC).toFixed(1);
+    document.getElementById('boxH').value=+(p.bH*IC).toFixed(1);
+    document.getElementById('boxWt').value=+(p.wt*0.453592).toFixed(2);
+    document.getElementById('palW').value=+(p.pW*IC).toFixed(1);
+    document.getElementById('palD').value=+(p.pD*IC).toFixed(1);
+    document.getElementById('palMaxH').value=+(p.mH*IC).toFixed(1);
+  } else {
+    document.getElementById('boxW').value=p.bW;
+    document.getElementById('boxL').value=p.bL;
+    document.getElementById('boxH').value=p.bH;
+    document.getElementById('boxWt').value=p.wt;
+    document.getElementById('palW').value=p.pW;
+    document.getElementById('palD').value=p.pD;
+    document.getElementById('palMaxH').value=p.mH;
+  }
+  document.getElementById('perLayer').value=0;
+  document.getElementById('maxL').value=p.layers;
+  document.getElementById('lrange').value=p.layers;
+  document.getElementById('lv').textContent=p.layers;
+  // enable auto-height
+  autoH=true;document.getElementById('ah-btn').classList.add('on');
+  const inp=document.getElementById('palMaxH');inp.disabled=true;inp.style.opacity='0.5';
+  document.querySelectorAll('.pal-pre').forEach(e=>e.classList.remove('on'));
+  PALS.forEach((pp,i)=>{if(pp.w===p.pW&&pp.d===p.pD)document.getElementById('pp'+i).classList.add('on');});
+  lslide(document.getElementById('lrange'));
+  toast(p.name);
+}
+
+initThree();initCatalog();updPP();calc();
 </script>
 </body>
 </html>
