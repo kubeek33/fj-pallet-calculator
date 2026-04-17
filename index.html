@@ -119,6 +119,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 .cat-panel{position:absolute;top:11px;right:11px;z-index:5}
 .cat-panel select{height:30px;border:1px solid rgba(0,0,0,.15);border-radius:var(--r);background:rgba(255,255,255,.88);color:#444;font-size:11px;font-weight:600;padding:0 8px;cursor:pointer;outline:none;min-width:200px;font-family:inherit}
 .cat-panel select:focus{border-color:var(--accent);background:#fff}
+.preset-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:4px;vertical-align:middle}
 
 .ov-panel{position:absolute;bottom:11px;right:11px;background:rgba(255,255,255,.93);border:1px solid rgba(0,0,0,.1);border-radius:var(--r);padding:8px 11px;font-size:11px;color:var(--text2)}
 .ov-panel div{margin-bottom:2px;display:flex;justify-content:space-between;gap:16px}
@@ -144,6 +145,16 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 .var-btn:hover{background:var(--bg3);border-color:var(--border2)}
 .var-btn.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
 .var-btn .vn{font-weight:700}.var-btn .vp{font-weight:800;white-space:nowrap}
+
+/* Stack Builder */
+.sb-entry{display:flex;align-items:center;gap:3px;padding:4px 5px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);margin-bottom:3px}
+.sb-entry select{flex:1;height:24px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:10px;padding:0 4px;outline:none;font-family:inherit;min-width:0;cursor:pointer}
+.sb-lnum{width:40px;height:24px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:11px;text-align:center;padding:0;outline:none;-moz-appearance:textfield;font-family:inherit}
+.sb-lnum::-webkit-inner-spin-button{-webkit-appearance:none}
+.sb-del{height:24px;width:22px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+.sb-del:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-bdr)}
+.sb-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.12)}
+.sb-lbl{font-size:9px;font-weight:700;color:var(--text3);flex-shrink:0}
 </style>
 </head>
 <body>
@@ -202,9 +213,6 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
       <div class="ob-grid">
         <button class="ob on" id="ob-auto" onclick="setOrient('auto')">Auto best</button>
         <button class="ob" id="ob-interlock" onclick="setOrient('interlock')">Interlock</button>
-        <button class="ob" id="ob-mixed" onclick="setOrient('mixed')">Mixed rows</button>
-        <button class="ob" id="ob-flat" onclick="setOrient('flat')">W×L flat</button>
-        <button class="ob" id="ob-rot" onclick="setOrient('rot')">L×W rotated</button>
       </div>
       <div id="var-list" class="var-list" style="display:none"></div>
     </div>
@@ -226,8 +234,8 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
       <div class="f"><label>Tape colour</label><input type="color" id="tapeCol" value="#ffffff" oninput="clrTexCache();draw()"></div>
     </div>
     <div class="f" style="margin-bottom:6px">
-      <label>Opacity: <strong id="opv">95</strong>%</label>
-      <input type="range" id="opRange" min="20" max="100" value="95" step="1" oninput="opslide(this)">
+      <label>Opacity: <strong id="opv">100</strong>%</label>
+      <input type="range" id="opRange" min="20" max="100" value="100" step="1" oninput="opslide(this)">
     </div>
     <div class="tog-row" style="margin-bottom:7px">
       <button class="tog on" id="tog-mir" onclick="toggleMirror()">Mirror layers</button>
@@ -303,11 +311,47 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     <table class="dt" id="dtbl"></table>
   </div>
 
+  <!-- STACK BUILDER -->
+  <div class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+      <div class="st" style="margin:0">Stack Builder</div>
+      <button class="tog" id="tog-sb" onclick="toggleStackMode()" title="Build a pallet with different products per layer group">Enable</button>
+    </div>
+    <div id="sb-body" style="display:none">
+      <div id="sb-list"></div>
+      <button class="ab" style="margin-top:5px;width:100%;justify-content:center;height:28px" onclick="addStackEntry()">＋ Add product</button>
+      <div id="sb-stats" style="margin-top:6px"></div>
+    </div>
+  </div>
+
   <div class="actions">
+    <div class="btn-row" style="margin-bottom:4px">
+      <button class="ab" onclick="savePreset()" id="btn-save" style="display:none">💾 Save preset</button>
+      <button class="ab" onclick="clearPreset()" id="btn-clr" style="display:none">✕ Clear</button>
+      <button class="ab" onclick="exportPresets()">Export</button>
+      <label class="ab" style="cursor:pointer" title="Import presets JSON">Import<input type="file" accept=".json" style="display:none" onchange="importPresets(this)"></label>
+    </div>
     <div class="btn-row">
       <button class="ab" onclick="copyR()">Copy</button>
       <button class="ab" onclick="exportCSV()">CSV</button>
       <button class="ab pri" onclick="exportPNG()">PNG</button>
+    </div>
+    <div class="btn-row" style="margin-top:4px">
+      <button class="ab" onclick="openAddCustom()" style="border-color:var(--accent);color:var(--accent)">＋ Add to catalog</button>
+      <button class="ab" id="btn-del-custom" onclick="deleteCustomProduct()" style="display:none">🗑 Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom product modal -->
+<div id="custom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;padding:20px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,.25)">
+    <div style="font-size:12px;font-weight:800;margin-bottom:12px;color:var(--text)">Add custom product</div>
+    <div class="f" style="margin-bottom:8px"><label>Product name</label><input type="text" id="cust-name" placeholder="e.g. My Box" style="height:28px;border:1px solid var(--border2);border-radius:var(--r);padding:0 8px;font-size:12px;font-family:inherit;outline:none;width:100%"></div>
+    <div class="f" style="margin-bottom:14px"><label>SKU / ID</label><input type="text" id="cust-sku" placeholder="e.g. CUSTOM-001" style="height:28px;border:1px solid var(--border2);border-radius:var(--r);padding:0 8px;font-size:12px;font-family:inherit;outline:none;width:100%"></div>
+    <div style="display:flex;gap:6px">
+      <button onclick="closeAddCustom()" style="flex:1;height:30px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);font-size:11px;font-weight:700;cursor:pointer">Cancel</button>
+      <button onclick="confirmAddCustom()" style="flex:1;height:30px;border:none;border-radius:var(--r);background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer">Save</button>
     </div>
   </div>
 </div>
@@ -400,7 +444,7 @@ function setPP(i){
 }
 function setOrient(o){
   orient=o;selVar=-1;
-  ['auto','interlock','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));
+  ['auto','interlock'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===o));
   if(o==='interlock'&&!useMirror){useMirror=true;document.getElementById('tog-mir').classList.add('on');}
   document.getElementById('var-list').style.display=o==='interlock'?'flex':'none';
   calc();
@@ -841,6 +885,7 @@ function updStats(r){
 
 // ── draw 3D
 function draw(){
+  if(stackMode){drawStack();return;}
   if(!lastR)return;
   const r=lastR;
   boxGrp.clear();
@@ -851,26 +896,33 @@ function draw(){
   const emAt=new THREE.LineBasicMaterial({color:0x000,transparent:true,opacity:.12});
 
   // Build material set for a given box footprint (bx × bz).
-  // tapeDir: 'v' if bx>=bz (tape along longer X), 'h' if bz>bx (tape along longer Z)
-  // THREE face order: +X right, -X left, +Y top, -Y bottom, +Z front, -Z back
-  function buildMats(bx,bz){
+  // tapeDir: 'v' if bx>=bz, 'h' if bz>bx
+  // THREE face slot order: [+X right, -X left, +Y top, -Y bottom, +Z front, -Z back]
+  // isRotated=false (flat):    slot→image: right,left,top,bottom,front,back
+  // isRotated=true  (rot 90°): box turned CW → original front is now at +X slot
+  //   slot→image: front,back,top,bottom,left,right
+  function buildMats(bx,bz,isRotated){
     const td=bz>bx?'v':'h';
-    return ['right','left','top','bottom','front','back']
-      .map(f=>new THREE.MeshStandardMaterial({map:getFTex(f,td),roughness:.82,metalness:.04,transparent:tr,opacity:op}));
+    const sd=isRotated?(td==='v'?'h':'v'):td; // flipped for rotated side faces
+    const faces=isRotated
+      ?['front','back','top','bottom','left','right']   // 90° CW remap
+      :['right','left','top','bottom','front','back'];  // standard
+    return faces.map(f=>new THREE.MeshStandardMaterial({map:getFTex(f,f==='top'||f==='bottom'?td:sd),roughness:.82,metalness:.04,transparent:tr,opacity:op}));
   }
 
   const baseY=ptop();
   const ly=r.lay;
 
-  // Pre-build per-zone material sets (avoids rebuilding per box)
+  // Pre-build per-zone material sets
   let matsMain, matsAlt;
   if(ly.mixed){
     const bxA=ly.bXA||ly.bXFlat, bzA=ly.bZA||ly.bZFlat;
     const bxB=ly.bXB||ly.bXRot, bzB=ly.bZB||ly.bZRot;
-    matsMain=buildMats(bxA,bzA);
-    matsAlt =buildMats(bxB,bzB);
+    matsMain=buildMats(bxA,bzA,false);  // flat zone — original orientation
+    matsAlt =buildMats(bxB,bzB,true);   // rotated zone — 90° remap
   } else {
-    matsMain=buildMats(ly.bX,ly.bZ);
+    const isRot=ly.label==='rotated';
+    matsMain=buildMats(ly.bX,ly.bZ,isRot);
     matsAlt=matsMain;
   }
 
@@ -1193,15 +1245,270 @@ function initCatalog(){
       lastCat=p.cat;
     }
     const opt=document.createElement('option');
-    opt.value=i;
+    opt.value=i;opt.dataset.ci=i;
     opt.textContent=`${p.name} (${p.sku})`;
     grp.appendChild(opt);
   });
 }
 
+// ── preset system
+const PRESET_KEY='fpc_presets_v1';
+let presets={};       // sku → preset object
+let curCatIdx=-1;     // currently selected catalog index
+
+function _loadPresetsFromStorage(){
+  try{const raw=localStorage.getItem(PRESET_KEY);if(raw)presets=JSON.parse(raw);}catch(e){}
+}
+function _savePresetsToStorage(){
+  try{localStorage.setItem(PRESET_KEY,JSON.stringify(presets));}catch(e){alert('Storage full — export presets to save externally.');}
+}
+
+function _presetSaveBtns(show){
+  document.getElementById('btn-save').style.display=show?'':'none';
+  document.getElementById('btn-clr').style.display=(show&&presets[_curSku()])? '':'none';
+}
+function _curSku(){
+  if(curCatIdx<0)return null;
+  const all=[...CATALOG,...customProducts];
+  return all[curCatIdx]?.sku||null;
+}
+
+function savePreset(){
+  const sku=_curSku();if(!sku)return;
+  presets[sku]={
+    orient, selVar, useMirror,
+    varKey: (orient==='interlock'&&selVar>=0&&interlockVars[selVar])?_varKey(interlockVars[selVar]):null,
+    boxCol:document.getElementById('boxCol').value,
+    tapeCol:document.getElementById('tapeCol').value,
+    perLayer:document.getElementById('perLayer').value,
+    fImgData:{...fImgData},
+  };
+  _savePresetsToStorage();
+  _refreshCatalogOptions();
+  _presetSaveBtns(true);
+  document.getElementById('btn-clr').style.display='';
+  toast('Preset saved ✓');
+}
+function clearPreset(){
+  const sku=_curSku();if(!sku)return;
+  delete presets[sku];
+  _savePresetsToStorage();
+  _refreshCatalogOptions();
+  _presetSaveBtns(true);
+  document.getElementById('btn-clr').style.display='none';
+  toast('Preset cleared');
+}
+function _varKey(v){
+  if(!v||!v.mixed)return v?v.label:null;
+  if(v.mixType==='cols')return`c${v.cA}_${v.cB}`;
+  if(v.mixType==='rows')return`r${v.rFlat}_${v.rRot}`;
+  return null;
+}
+function _findVarByKey(key){
+  if(!key)return -1;
+  return interlockVars.findIndex(v=>{
+    if(!v.mixed)return v.label===key;
+    if(v.mixType==='cols')return`c${v.cA}_${v.cB}`===key;
+    if(v.mixType==='rows')return`r${v.rFlat}_${v.rRot}`===key;
+    return false;
+  });
+}
+
+function _applyPreset(sku){
+  const p=presets[sku];if(!p)return false;
+  // colors
+  if(p.boxCol){document.getElementById('boxCol').value=p.boxCol;clrTexCache();}
+  if(p.tapeCol){document.getElementById('tapeCol').value=p.tapeCol;clrTexCache();}
+  // per-layer
+  if(p.perLayer!=null)document.getElementById('perLayer').value=p.perLayer;
+  // images
+  if(p.fImgData){
+    Object.keys(p.fImgData).forEach(face=>{
+      if(!p.fImgData[face])return;
+      fImgData[face]=p.fImgData[face];
+      const img=new Image();img.src=p.fImgData[face];fImgEls[face]=img;
+      const si=document.getElementById('fi-'+face);
+      si.setAttribute('href',p.fImgData[face]);si.style.display='block';
+      document.getElementById('fh-'+face).classList.add('img');
+    });
+    updFClears();
+  }
+  // orientation
+  if(p.orient&&p.orient!==orient){
+    orient=p.orient;
+    ['auto','interlock','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===p.orient));
+    if(p.orient==='interlock'){
+      if(!useMirror){useMirror=true;document.getElementById('tog-mir').classList.add('on');}
+      document.getElementById('var-list').style.display='flex';
+    }
+  }
+  // mirror
+  if(p.useMirror!=null&&p.useMirror!==useMirror){
+    useMirror=p.useMirror;document.getElementById('tog-mir').classList.toggle('on',useMirror);
+  }
+  return true;
+}
+
+function _applyVariantKey(key){
+  if(!key)return;
+  const idx=_findVarByKey(key);
+  if(idx>=0){selVar=idx;document.querySelectorAll('.var-btn').forEach((b,j)=>b.classList.toggle('on',j===idx));}
+}
+
+function _refreshCatalogOptions(){
+  document.querySelectorAll('#catSel option[data-ci]').forEach(opt=>{
+    const i=parseInt(opt.dataset.ci);
+    const sku=CATALOG[i].sku;
+    const base=`${CATALOG[i].name} (${sku})`;
+    opt.textContent=presets[sku]?'★ '+base:base;
+  });
+}
+
+function exportPresets(){
+  if(!Object.keys(presets).length){toast('No presets saved yet');return;}
+  const blob=new Blob([JSON.stringify(presets,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='forjars_presets.json';a.click();URL.revokeObjectURL(a.href);
+  toast('Presets exported');
+}
+function importPresets(input){
+  const f=input.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      Object.assign(presets,data);
+      _savePresetsToStorage();
+      _refreshCatalogOptions();
+      toast(`Imported ${Object.keys(data).length} preset(s)`);
+    }catch{toast('Invalid presets file');}
+    input.value='';
+  };
+  rd.readAsText(f);
+}
+
+// ── custom products
+const CUSTOM_KEY='fpc_custom_v1';
+let customProducts=[]; // [{cat,name,sku,bW,bL,bH,wt,pW,pD,layers}, ...]
+
+function _loadCustom(){
+  try{const r=localStorage.getItem(CUSTOM_KEY);if(r)customProducts=JSON.parse(r);}catch(e){}
+}
+function _saveCustom(){
+  try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(customProducts));}catch(e){alert('Storage full.');}
+}
+
+function openAddCustom(){
+  const n=document.getElementById('cust-name');
+  const s=document.getElementById('cust-sku');
+  // suggest current product name as base if custom selected
+  n.value=''; s.value='CUSTOM-'+(customProducts.length+1).toString().padStart(3,'0');
+  document.getElementById('custom-modal').style.display='flex';
+  setTimeout(()=>n.focus(),50);
+}
+function closeAddCustom(){
+  document.getElementById('custom-modal').style.display='none';
+}
+function confirmAddCustom(){
+  const name=document.getElementById('cust-name').value.trim();
+  const sku=document.getElementById('cust-sku').value.trim()||('CUSTOM-'+(Date.now()));
+  if(!name){document.getElementById('cust-name').focus();return;}
+
+  // check duplicate sku
+  if(customProducts.find(p=>p.sku===sku)){
+    if(!confirm(`SKU "${sku}" already exists — overwrite?`))return;
+    customProducts=customProducts.filter(p=>p.sku!==sku);
+  }
+
+  const prod={
+    cat:'Custom',name,sku,
+    bW:gv('boxW'),bL:gv('boxL'),bH:gv('boxH'),
+    wt:unit==='cm'?(parseFloat(document.getElementById('boxWt').value)||0)/0.453592:(parseFloat(document.getElementById('boxWt').value)||0),
+    pW:gv('palW'),pD:gv('palD'),
+    layers:parseInt(document.getElementById('maxL').value)||10,
+  };
+  customProducts.push(prod);
+  _saveCustom();
+
+  // also save current preset under this sku
+  presets[sku]={
+    orient,selVar,useMirror,
+    varKey:(orient==='interlock'&&selVar>=0&&interlockVars[selVar])?_varKey(interlockVars[selVar]):null,
+    boxCol:document.getElementById('boxCol').value,
+    tapeCol:document.getElementById('tapeCol').value,
+    perLayer:document.getElementById('perLayer').value,
+    fImgData:{...fImgData},
+  };
+  _savePresetsToStorage();
+
+  _rebuildCatalog();
+  closeAddCustom();
+
+  // auto-select the new product
+  const allProds=[...CATALOG,...customProducts];
+  const newIdx=allProds.findIndex(p=>p.sku===sku);
+  if(newIdx>=0){
+    document.getElementById('catSel').value=newIdx;
+    curCatIdx=newIdx;
+    _presetSaveBtns(true);
+    _showDeleteBtn(true);
+  }
+  toast(`Saved: ${name}`);
+}
+
+function deleteCustomProduct(){
+  const p=curCatIdx>=0?[...CATALOG,...customProducts][curCatIdx]:null;
+  if(!p||p.cat!=='Custom'){toast('Only custom products can be deleted');return;}
+  if(!confirm(`Delete "${p.name}" from catalog?`))return;
+  customProducts=customProducts.filter(c=>c.sku!==p.sku);
+  delete presets[p.sku];
+  _saveCustom();_savePresetsToStorage();
+  _rebuildCatalog();
+  curCatIdx=-1;
+  document.getElementById('catSel').value=-1;
+  _presetSaveBtns(false);
+  _showDeleteBtn(false);
+  toast('Deleted');
+}
+
+function _showDeleteBtn(show){
+  document.getElementById('btn-del-custom').style.display=show?'':'none';
+}
+
+function _rebuildCatalog(){
+  const sel=document.getElementById('catSel');
+  // remove all options except first placeholder
+  while(sel.options.length>1)sel.remove(1);
+  // re-add built-in
+  const all=[...CATALOG,...customProducts];
+  let lastCat='',grp;
+  all.forEach((p,i)=>{
+    if(p.cat!==lastCat){
+      grp=document.createElement('optgroup');grp.label=p.cat;sel.appendChild(grp);lastCat=p.cat;
+    }
+    const opt=document.createElement('option');
+    opt.value=i;opt.dataset.ci=i;
+    opt.textContent=(presets[p.sku]?'★ ':'')+`${p.name} (${p.sku})`;
+    grp.appendChild(opt);
+  });
+}
+
 function loadProduct(idx){
-  if(idx<0)return;
-  const p=CATALOG[idx];
+  const all=[...CATALOG,...customProducts];
+  if(idx<0||idx>=all.length)return;
+  curCatIdx=idx;
+  const p=all[idx];
+  const isCustom=p.cat==='Custom';
+  _showDeleteBtn(isCustom);
+
+  // clear images
+  Object.keys(fImgData).forEach(f=>{
+    fImgData[f]=null;fImgEls[f]=null;
+    const si=document.getElementById('fi-'+f);si.style.display='none';si.removeAttribute('href');
+    document.getElementById('fh-'+f).classList.remove('img');
+  });
+  updFClears();clrTexCache();
+
   if(unit==='cm'){
     document.getElementById('boxW').value=+(p.bW*IC).toFixed(1);
     document.getElementById('boxL').value=+(p.bL*IC).toFixed(1);
@@ -1209,30 +1516,265 @@ function loadProduct(idx){
     document.getElementById('boxWt').value=+(p.wt*0.453592).toFixed(2);
     document.getElementById('palW').value=+(p.pW*IC).toFixed(1);
     document.getElementById('palD').value=+(p.pD*IC).toFixed(1);
-    document.getElementById('palMaxH').value=+(p.mH*IC).toFixed(1);
   } else {
     document.getElementById('boxW').value=p.bW;
     document.getElementById('boxL').value=p.bL;
     document.getElementById('boxH').value=p.bH;
-    document.getElementById('boxWt').value=p.wt;
+    document.getElementById('boxWt').value=+(p.wt).toFixed(1);
     document.getElementById('palW').value=p.pW;
     document.getElementById('palD').value=p.pD;
-    document.getElementById('palMaxH').value=p.mH;
   }
   document.getElementById('perLayer').value=0;
   document.getElementById('maxL').value=p.layers;
   document.getElementById('lrange').value=p.layers;
   document.getElementById('lv').textContent=p.layers;
-  // enable auto-height
   autoH=true;document.getElementById('ah-btn').classList.add('on');
   const inp=document.getElementById('palMaxH');inp.disabled=true;inp.style.opacity='0.5';
   document.querySelectorAll('.pal-pre').forEach(e=>e.classList.remove('on'));
   PALS.forEach((pp,i)=>{if(pp.w===p.pW&&pp.d===p.pD)document.getElementById('pp'+i).classList.add('on');});
+
+  const hadPreset=_applyPreset(p.sku);
   lslide(document.getElementById('lrange'));
-  toast(p.name);
+  if(hadPreset&&presets[p.sku]?.varKey)_applyVariantKey(presets[p.sku].varKey);
+  if(hadPreset&&presets[p.sku]?.varKey)calc();
+  _presetSaveBtns(true);
+  toast((hadPreset?'★ ':'')+p.name);
 }
 
-initThree();initCatalog();updPP();calc();
+// ── Stack Builder
+const STACK_COLORS=['#e2943c','#4a90d9','#5cb85c','#d9534f','#9b59b6','#f0ad4e','#1abc9c','#e67e22','#16a085','#c0392b'];
+let stackMode=false;
+let stackEntries=[]; // [{prodIdx:number, layers:number}]
+
+function toggleStackMode(){
+  stackMode=!stackMode;
+  const btn=document.getElementById('tog-sb');
+  btn.classList.toggle('on',stackMode);
+  btn.textContent=stackMode?'Active':'Enable';
+  document.getElementById('sb-body').style.display=stackMode?'block':'none';
+  if(stackMode&&stackEntries.length===0){
+    const all=[...CATALOG,...customProducts];
+    stackEntries.push({prodIdx:Math.min(0,all.length-1),layers:3});
+    if(all.length>1)stackEntries.push({prodIdx:1,layers:3});
+    renderStackList();
+  }
+  if(stackMode)drawStack();
+  else{if(lastR)draw();}
+}
+
+function addStackEntry(){
+  const all=[...CATALOG,...customProducts];
+  const used=new Set(stackEntries.map(e=>e.prodIdx));
+  let prodIdx=0;
+  for(let i=0;i<all.length;i++){if(!used.has(i)){prodIdx=i;break;}}
+  stackEntries.push({prodIdx,layers:3});
+  renderStackList();
+  drawStack();
+}
+
+function removeStackEntry(i){
+  stackEntries.splice(i,1);
+  renderStackList();
+  drawStack();
+}
+
+function sbSetProd(i,v){
+  stackEntries[i].prodIdx=v;
+  renderStackList();
+  drawStack();
+}
+
+function sbSetLayers(i,v){
+  stackEntries[i].layers=Math.max(1,parseInt(v)||1);
+  _updateStackStats();
+  drawStack();
+}
+
+function _sbColor(prodIdx,fallbackIdx){
+  const all=[...CATALOG,...customProducts];
+  const sku=prodIdx>=0&&all[prodIdx]?all[prodIdx].sku:null;
+  return (sku&&presets[sku]?.boxCol)||STACK_COLORS[fallbackIdx%STACK_COLORS.length];
+}
+
+function renderStackList(){
+  const el=document.getElementById('sb-list');
+  el.innerHTML='';
+  const all=[...CATALOG,...customProducts];
+  stackEntries.forEach((entry,i)=>{
+    const col=_sbColor(entry.prodIdx,i);
+    const div=document.createElement('div');
+    div.className='sb-entry';
+    const opts=all.map((p,idx)=>`<option value="${idx}"${idx===entry.prodIdx?' selected':''}>${p.name}</option>`).join('');
+    div.innerHTML=
+      `<div class="sb-swatch" style="background:${col}"></div>`+
+      `<select onchange="sbSetProd(${i},parseInt(this.value))">${opts}</select>`+
+      `<span class="sb-lbl">×</span>`+
+      `<input class="sb-lnum" type="number" value="${entry.layers}" min="1" max="99" onchange="sbSetLayers(${i},this.value)" title="Number of layers">`+
+      `<button class="sb-del" onclick="removeStackEntry(${i})">×</button>`;
+    el.appendChild(div);
+  });
+  _updateStackStats();
+}
+
+function _updateStackStats(){
+  const el=document.getElementById('sb-stats');
+  if(!stackMode||!stackEntries.length){el.innerHTML='';return;}
+  const all=[...CATALOG,...customProducts];
+  const pW=gv('palW'),pD=gv('palD');
+  let totalBoxes=0,totalWtLb=30;
+  let rows='<div style="border-top:1px solid var(--border);padding-top:5px">';
+  stackEntries.forEach((entry,i)=>{
+    const p=entry.prodIdx>=0?all[entry.prodIdx]:null;
+    if(!p)return;
+    const lay=calcLayout(pW,pD,p.bW,p.bL,p.bH,0,'auto',0);
+    const boxes=lay.per*entry.layers;
+    totalBoxes+=boxes;
+    totalWtLb+=boxes*p.wt;
+    const col=_sbColor(entry.prodIdx,i);
+    rows+=`<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:10px">`+
+      `<div class="sb-swatch" style="background:${col}"></div>`+
+      `<span style="flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>`+
+      `<span style="font-weight:700;color:var(--text);white-space:nowrap">${boxes} boxes</span>`+
+      `</div>`;
+  });
+  const dWt=wD(totalWtLb).toFixed(0);
+  rows+=`<div style="display:flex;justify-content:space-between;padding:4px 0 0;border-top:1px solid var(--border);margin-top:3px;font-size:11px">`+
+    `<span style="font-weight:800">Total</span>`+
+    `<span style="font-weight:800;color:var(--accent)">${totalBoxes} boxes · ${dWt} ${wl()}</span></div></div>`;
+  el.innerHTML=rows;
+}
+
+// Inner layer-drawing helper used by both draw() and drawStack()
+function _drawLayerBoxes(ly,yOff,mir,matsMain,matsAlt,placeBox){
+  if(ly.mixed){
+    if(ly.mixType==='cols'){
+      const totalX=(ly.cA||0)*ly.bXA+(ly.cB||0)*ly.bXB;
+      const sXA=-totalX/2;
+      if(!mir){
+        for(let c=0;c<(ly.cA||0);c++){
+          const x=sXA+c*ly.bXA+ly.bXA/2;
+          const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
+          for(let row=0;row<(ly.rA||0);row++)placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA,matsMain);
+        }
+        const sXB=sXA+(ly.cA||0)*ly.bXA;
+        for(let c=0;c<(ly.cB||0);c++){
+          const x=sXB+c*ly.bXB+ly.bXB/2;
+          const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
+          for(let row=0;row<(ly.rB||0);row++)placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB,matsAlt);
+        }
+      } else {
+        const sXB2=-totalX/2;
+        for(let c=0;c<(ly.cB||0);c++){
+          const x=sXB2+c*ly.bXB+ly.bXB/2;
+          const sZ=-(ly.rB*ly.bZB)/2+ly.bZB/2;
+          for(let row=0;row<(ly.rB||0);row++)placeBox(x,yOff,sZ+row*ly.bZB,ly.bXB,ly.lH,ly.bZB,matsAlt);
+        }
+        const sXA2=sXB2+(ly.cB||0)*ly.bXB;
+        for(let c=0;c<(ly.cA||0);c++){
+          const x=sXA2+c*ly.bXA+ly.bXA/2;
+          const sZ=-(ly.rA*ly.bZA)/2+ly.bZA/2;
+          for(let row=0;row<(ly.rA||0);row++)placeBox(x,yOff,sZ+row*ly.bZA,ly.bXA,ly.lH,ly.bZA,matsMain);
+        }
+      }
+    } else { // rows
+      const totalZ=(ly.rFlat||0)*ly.bZFlat+(ly.rRot||0)*ly.bZRot;
+      const sZStart=-totalZ/2;
+      if(!mir){
+        const sXFlat=-(ly.cFlat*ly.bXFlat)/2+ly.bXFlat/2;
+        for(let row=0;row<(ly.rFlat||0);row++){
+          const z=sZStart+row*ly.bZFlat+ly.bZFlat/2;
+          for(let c=0;c<ly.cFlat;c++)placeBox(sXFlat+c*ly.bXFlat,yOff,z,ly.bXFlat,ly.lH,ly.bZFlat,matsMain);
+        }
+        const sXRot=-(ly.cRot*ly.bXRot)/2+ly.bXRot/2;
+        for(let row=0;row<(ly.rRot||0);row++){
+          const z=sZStart+(ly.rFlat||0)*ly.bZFlat+row*ly.bZRot+ly.bZRot/2;
+          for(let c=0;c<ly.cRot;c++)placeBox(sXRot+c*ly.bXRot,yOff,z,ly.bXRot,ly.lH,ly.bZRot,matsAlt);
+        }
+      } else {
+        const sXRot=-(ly.cRot*ly.bXRot)/2+ly.bXRot/2;
+        for(let row=0;row<(ly.rRot||0);row++){
+          const z=sZStart+row*ly.bZRot+ly.bZRot/2;
+          for(let c=0;c<ly.cRot;c++)placeBox(sXRot+c*ly.bXRot,yOff,z,ly.bXRot,ly.lH,ly.bZRot,matsAlt);
+        }
+        const sXFlat=-(ly.cFlat*ly.bXFlat)/2+ly.bXFlat/2;
+        for(let row=0;row<(ly.rFlat||0);row++){
+          const z=sZStart+(ly.rRot||0)*ly.bZRot+row*ly.bZFlat+ly.bZFlat/2;
+          for(let c=0;c<ly.cFlat;c++)placeBox(sXFlat+c*ly.bXFlat,yOff,z,ly.bXFlat,ly.lH,ly.bZFlat,matsMain);
+        }
+      }
+    }
+  } else {
+    const cols=ly.cols||0,rows=ly.rows||0;
+    const sX=-(cols*ly.bX)/2+ly.bX/2;
+    const sZ=-(rows*ly.bZ)/2+ly.bZ/2;
+    for(let c=0;c<cols;c++)
+      for(let row=0;row<rows;row++)
+        placeBox(sX+c*ly.bX,yOff,sZ+row*ly.bZ,ly.bX,ly.lH,ly.bZ,matsMain);
+  }
+}
+
+function drawStack(){
+  if(!stackMode)return;
+  const all=[...CATALOG,...customProducts];
+  const pW=gv('palW'),pD=gv('palD');
+  boxGrp.clear();
+  buildPallet(pW,pD);
+
+  const op=parseFloat(document.getElementById('opRange').value)/100;
+  const tr=op<1;
+  const emAt=new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.12});
+
+  function placeBox(x,y,z,bx,bh,bz,mats){
+    const g=new THREE.BoxGeometry(bx,bh,bz);
+    const m=new THREE.Mesh(g,mats);
+    m.position.set(x,y,z);m.castShadow=showShadow;m.receiveShadow=showShadow;
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bx+.04,bh+.04,bz+.04)),emAt));
+    boxGrp.add(m);
+  }
+
+  // Build a 6-face material array from a hex color string with face-brightness variation
+  function makeMats(hexColor,bright){
+    // [+X right, -X left, +Y top, -Y bottom, +Z front, -Z back]
+    const bs=[1.0,0.82,1.15,0.65,0.92,0.78].map(b=>b*(bright||1));
+    return bs.map(b=>{
+      const c=new THREE.Color(hexColor).multiplyScalar(Math.min(b,1));
+      return new THREE.MeshStandardMaterial({color:c,roughness:.82,metalness:.04,transparent:tr,opacity:op});
+    });
+  }
+
+  let yBase=ptop();
+
+  stackEntries.forEach((entry,ei)=>{
+    const p=entry.prodIdx>=0?all[entry.prodIdx]:null;
+    if(!p)return;
+    const lay=calcLayout(pW,pD,p.bW,p.bL,p.bH,0,'auto',0);
+    if(!lay||!lay.per)return;
+
+    const col=_sbColor(entry.prodIdx,ei);
+    const matsMain=makeMats(col,1);
+    const matsAlt=makeMats(col,0.9); // slightly darker for rotated zone differentiation
+
+    for(let l=0;l<entry.layers;l++){
+      const yOff=yBase+l*lay.lH+lay.lH/2;
+      const mir=useMirror&&l%2===1;
+      _drawLayerBoxes(lay,yOff,mir,matsMain,matsAlt,placeBox);
+    }
+    yBase+=entry.layers*lay.lH;
+  });
+
+  _updateStackStats();
+}
+
+// close modal on backdrop click
+document.getElementById('custom-modal').addEventListener('click',function(e){if(e.target===this)closeAddCustom();});
+// Enter key in modal inputs
+['cust-name','cust-sku'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')confirmAddCustom();}));
+
+initThree();
+_loadCustom();
+_loadPresetsFromStorage();
+_rebuildCatalog();
+updPP();calc();
 </script>
 </body>
 </html>
