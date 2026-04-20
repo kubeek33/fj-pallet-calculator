@@ -146,15 +146,114 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
 .var-btn.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
 .var-btn .vn{font-weight:700}.var-btn .vp{font-weight:800;white-space:nowrap}
 
-/* Stack Builder */
-.sb-entry{display:flex;align-items:center;gap:3px;padding:4px 5px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);margin-bottom:3px}
-.sb-entry select{flex:1;height:24px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:10px;padding:0 4px;outline:none;font-family:inherit;min-width:0;cursor:pointer}
-.sb-lnum{width:40px;height:24px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:11px;text-align:center;padding:0;outline:none;-moz-appearance:textfield;font-family:inherit}
-.sb-lnum::-webkit-inner-spin-button{-webkit-appearance:none}
-.sb-del{height:24px;width:22px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
-.sb-del:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-bdr)}
-.sb-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.12)}
-.sb-lbl{font-size:9px;font-weight:700;color:var(--text3);flex-shrink:0}
+/* ── Stack Builder ── */
+.sb-card{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);margin-bottom:5px;overflow:hidden;transition:box-shadow .12s}
+.sb-card:hover{box-shadow:0 1px 8px rgba(0,0,0,.08)}
+.sb-card-bar{width:5px;flex-shrink:0;cursor:pointer;position:relative;transition:opacity .15s}
+.sb-card-bar:hover{opacity:.75}
+.sb-card-bar input[type=color]{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;border:none;padding:0}
+.sb-card-body{flex:1;padding:7px 8px;min-width:0}
+.sb-card-head{display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.sb-card-sel{flex:1;height:24px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-size:11px;font-weight:600;padding:0 6px;outline:none;font-family:inherit;min-width:0;cursor:pointer}
+.sb-card-sel:focus{border-color:var(--accent)}
+.sb-act{width:20px;height:20px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:all .1s}
+.sb-act:hover:not([disabled]){background:var(--bg3);color:var(--text)}
+.sb-act[disabled]{opacity:.25;cursor:default}
+.sb-act.del:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-bdr)}
+.sb-card-meta{font-size:9px;color:var(--text3);margin-bottom:5px;line-height:1.5}
+.sb-card-meta b{color:var(--text2);font-weight:700}
+.sb-card-foot{display:flex;align-items:center;gap:6px}
+.sb-layer-btn{width:22px;height:22px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;transition:all .1s}
+.sb-layer-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.sb-layer-val{font-size:13px;font-weight:800;color:var(--accent);min-width:22px;text-align:center}
+.sb-layer-lbl{font-size:9px;color:var(--text3);font-weight:600;white-space:nowrap}
+.sb-wt-wrap{flex:1;display:flex;flex-direction:column;gap:2px;align-self:center}
+.sb-wt-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.sb-wt-fill{height:100%;border-radius:2px;transition:width .25s}
+
+.sb-add-row{margin:2px 0 5px}
+.sb-add-sel{width:100%;height:28px;border:1px dashed var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:11px;padding:0 8px;cursor:pointer;outline:none;font-family:inherit;transition:border .12s}
+.sb-add-sel:focus,.sb-add-sel:hover{border-color:var(--accent);color:var(--text)}
+
+.sb-edge{font-size:8px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);text-align:center;padding:3px 0;opacity:.55}
+
+.sb-total{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;margin-top:4px}
+.sb-total-row{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;margin-bottom:3px}
+.sb-total-row:last-child{margin:0;padding-top:4px;border-top:1px solid var(--border);font-size:11px}
+.sb-total-lbl{color:var(--text3);font-weight:600}
+.sb-total-val{font-weight:800;color:var(--text)}
+.sb-total-val.acc{color:var(--accent)}
+
+.sb-toolbar{display:flex;gap:4px;margin-bottom:7px}
+.sb-tbtn{flex:1;height:24px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:10px;font-weight:700;cursor:pointer;transition:all .12s;white-space:nowrap}
+.sb-tbtn:hover{background:var(--bg3);color:var(--text)}
+
+/* ── VIEWER / EDIT MODE ── */
+.edit-only{transition:opacity .15s}
+body.viewer-mode .edit-only{display:none!important}
+body.viewer-mode .viewer-only{display:revert!important}
+body.viewer-mode #viewer-bar{display:block!important}
+.viewer-only{display:none!important}
+
+/* mode badge in header */
+.mode-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;width:100%}
+.mode-badge .mb-label{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:var(--r);background:var(--bg3);color:var(--text3);flex:1;text-align:center}
+body.edit-mode .mode-badge .mb-label{background:#fff3e0;color:#c65e00;border:1px solid #f0c080}
+.mode-btn{height:24px;padding:0 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;letter-spacing:.3px}
+.mode-btn:hover{background:var(--bg3)}
+body.edit-mode .mode-btn{background:var(--bg2);color:var(--accent)}
+body.edit-mode #prod-card-wrap{display:none!important}
+
+/* viewer import/export bar */
+.viewer-bar{padding:8px 13px;border-bottom:1px solid var(--border);background:var(--bg)}
+.viewer-bar .vb-title{font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.vb-row{display:flex;gap:4px}
+.vb-btn{flex:1;height:30px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:.2px}
+.vb-btn:hover{background:var(--bg3);color:var(--text)}
+.vb-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.vb-btn.pri:hover{background:var(--accent2)}
+
+/* viewer product info card */
+.prod-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;margin-bottom:0}
+.prod-card .pc-name{font-size:12px;font-weight:800;color:var(--text);margin-bottom:3px}
+.prod-card .pc-sku{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:7px}
+.prod-card .pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.prod-card .pc-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:5px 7px}
+.prod-card .pc-val{font-size:14px;font-weight:800;color:var(--text);line-height:1}
+.prod-card .pc-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text3);margin-top:2px}
+.prod-card .pc-item.acc .pc-val{color:var(--accent)}
+
+/* layer step navigator */
+.layer-nav{padding:8px 13px;border-bottom:1px solid var(--border);background:var(--bg)}
+.layer-nav .ln-title{font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.ln-row{display:flex;align-items:center;gap:4px}
+.ln-btn{height:32px;width:32px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.ln-btn:hover:not(:disabled){background:var(--bg3);color:var(--text)}
+.ln-btn:disabled{opacity:.3;cursor:default}
+.ln-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;width:auto;padding:0 10px;font-size:12px}
+.ln-btn.pri:hover{background:var(--accent2)}
+.ln-progress{flex:1;position:relative;height:32px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;cursor:pointer}
+.ln-fill{position:absolute;inset:0;right:auto;background:var(--accent);opacity:.15;transition:width .15s}
+.ln-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--text)}
+.ln-all{height:32px;padding:0 10px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text3);font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}
+.ln-all:hover{background:var(--bg3);color:var(--text)}
+.ln-all.on{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+
+/* password modal */
+#pw-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+#pw-modal.open{display:flex}
+#pw-box{background:#fff;border-radius:8px;padding:24px;width:260px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+#pw-box h3{font-size:14px;font-weight:800;margin-bottom:4px;color:var(--text)}
+#pw-box p{font-size:11px;color:var(--text3);margin-bottom:14px}
+#pw-inp{width:100%;height:36px;border:1px solid var(--border2);border-radius:var(--r);padding:0 10px;font-size:14px;font-family:inherit;outline:none;letter-spacing:4px;text-align:center;margin-bottom:10px}
+#pw-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(212,22,26,.1)}
+#pw-err{font-size:10px;color:var(--accent);text-align:center;margin-bottom:8px;display:none}
+.pw-btns{display:flex;gap:6px}
+.pw-btns button{flex:1;height:32px;border-radius:var(--r);border:1px solid var(--border2);font-size:11px;font-weight:700;cursor:pointer}
+#pw-ok{background:var(--accent);border-color:var(--accent);color:#fff}
+#pw-ok:hover{background:var(--accent2)}
+#pw-cancel{background:var(--bg2);color:var(--text2)}
+#pw-cancel:hover{background:var(--bg3)}
 </style>
 </head>
 <body>
@@ -167,10 +266,54 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
       <button id="b-in" class="on" onclick="setUnit('in')">INCHES</button>
       <button id="b-cm" onclick="setUnit('cm')">CENTIMETRES</button>
     </div>
+    <div class="mode-badge">
+      <span class="mb-label" id="mode-label">VIEWER MODE</span>
+      <button class="mode-btn" id="mode-btn" onclick="openPwModal()">🔓 Edit</button>
+    </div>
   </div>
 
-  <!-- PALLET -->
-  <div class="sec">
+  <!-- viewer: import/export bar -->
+  <div class="viewer-bar viewer-only" id="viewer-bar">
+    <div class="vb-title">Presets</div>
+    <div class="vb-row">
+      <label class="vb-btn pri" style="cursor:pointer" title="Import presets JSON">
+        ⬆ Import presets
+        <input type="file" accept=".json" style="display:none" onchange="importPresets(this)">
+      </label>
+      <button class="vb-btn" onclick="exportPresets()">⬇ Export</button>
+    </div>
+  </div>
+
+  <!-- viewer: selected product info card -->
+  <div class="sec" id="prod-card-wrap" style="display:none">
+    <div class="prod-card" id="prod-card">
+      <div class="pc-name" id="pc-name">—</div>
+      <div class="pc-sku" id="pc-sku"></div>
+      <div class="pc-grid">
+        <div class="pc-item"><div class="pc-val" id="pc-dims">—</div><div class="pc-lbl">Box W×L×H (in)</div></div>
+        <div class="pc-item"><div class="pc-val" id="pc-wt">—</div><div class="pc-lbl">Box weight</div></div>
+        <div class="pc-item acc"><div class="pc-val" id="pc-total">—</div><div class="pc-lbl">Total boxes</div></div>
+        <div class="pc-item"><div class="pc-val" id="pc-stack">—</div><div class="pc-lbl">Total weight</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer step navigator (viewer-only, visible when product loaded) -->
+  <div class="layer-nav" id="layer-nav" style="display:none">
+    <div class="ln-title">Layer view — step by step</div>
+    <div class="ln-row">
+      <button class="ln-btn" id="ln-prev" onclick="layerStep(-1)" title="Previous layer">‹</button>
+      <div class="ln-progress" onclick="layerProgressClick(event)" title="Click to jump to layer">
+        <div class="ln-fill" id="ln-fill" style="width:0%"></div>
+        <div class="ln-label" id="ln-label">—</div>
+      </div>
+      <button class="ln-btn" id="ln-next" onclick="layerStep(1)" title="Next layer">›</button>
+      <button class="ln-all" id="ln-all" onclick="layerShowAll()">All</button>
+    </div>
+  </div>
+
+  <!-- PALLET (edit-only manual inputs; viewer shows read-only pallet info from product card) -->
+  <div class="sec edit-only">
     <div class="st">Pallet</div>
     <div class="pal-grid">
       <div class="pal-pre on" id="pp0" onclick="setPP(0)"><div class="pn">GMA / US</div><div class="ps" id="pps0">48 × 40 in</div></div>
@@ -191,8 +334,8 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
-  <!-- BOX -->
-  <div class="sec">
+  <!-- BOX (edit-only) -->
+  <div class="sec edit-only">
     <div class="st">Box dimensions — W × L × H</div>
     <div class="g3">
       <div class="f"><label id="l-bw">W (in)</label><input type="number" id="boxW" value="10" min="0.5" step="0.5" oninput="calc()"></div>
@@ -205,8 +348,8 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
-  <!-- STACKING -->
-  <div class="sec">
+  <!-- STACKING (edit-only) -->
+  <div class="sec edit-only">
     <div class="st">Stacking</div>
     <div class="f" style="margin-bottom:6px">
       <label>Orientation</label>
@@ -226,8 +369,8 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     </div>
   </div>
 
-  <!-- BOX DESIGN -->
-  <div class="sec">
+  <!-- BOX DESIGN (edit-only) -->
+  <div class="sec edit-only">
     <div class="st">Box design</div>
     <div class="g2" style="margin-bottom:6px">
       <div class="f"><label>Box colour</label><input type="color" id="boxCol" value="#e2943c" oninput="clrTexCache();draw()"></div>
@@ -316,30 +459,40 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
   <div class="sec">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
       <div class="st" style="margin:0">Stack Builder</div>
-      <button class="tog" id="tog-sb" onclick="toggleStackMode()" title="Build a pallet with different products per layer group">Enable</button>
+      <button class="tog" id="tog-sb" onclick="toggleStackMode()">Enable</button>
     </div>
     <div id="sb-body" style="display:none">
+      <div class="sb-toolbar">
+        <button class="sb-tbtn" onclick="_sortStackByWeight();renderStackList();drawStack()" title="Put heaviest layers at bottom">⬇ Sort by weight</button>
+        <button class="sb-tbtn" onclick="stackEntries=[];renderStackList();drawStack()">✕ Clear all</button>
+      </div>
       <div id="sb-list"></div>
-      <button class="ab" style="margin-top:5px;width:100%;justify-content:center;height:28px" onclick="addStackEntry()">＋ Add product</button>
-      <div id="sb-stats" style="margin-top:6px"></div>
+      <div class="sb-add-row">
+        <select class="sb-add-sel" id="sb-add-sel" onchange="sbAddFromSel(this)">
+          <option value="-1">＋ Add product to stack…</option>
+        </select>
+      </div>
+      <div id="sb-stats"></div>
     </div>
   </div>
 
   <div class="actions">
-    <div class="btn-row" style="margin-bottom:4px">
+    <!-- edit-only buttons -->
+    <div class="btn-row edit-only" style="margin-bottom:4px">
       <button class="ab" onclick="savePreset()" id="btn-save" style="display:none">💾 Save preset</button>
       <button class="ab" onclick="clearPreset()" id="btn-clr" style="display:none">✕ Clear</button>
       <button class="ab" onclick="exportPresets()">Export</button>
       <label class="ab" style="cursor:pointer" title="Import presets JSON">Import<input type="file" accept=".json" style="display:none" onchange="importPresets(this)"></label>
     </div>
+    <div class="btn-row edit-only" style="margin-bottom:4px">
+      <button class="ab" onclick="openAddCustom()" style="border-color:var(--accent);color:var(--accent)">＋ Add to catalog</button>
+      <button class="ab" id="btn-del-custom" onclick="deleteCustomProduct()" style="display:none">🗑 Delete</button>
+    </div>
+    <!-- always visible -->
     <div class="btn-row">
       <button class="ab" onclick="copyR()">Copy</button>
       <button class="ab" onclick="exportCSV()">CSV</button>
       <button class="ab pri" onclick="exportPNG()">PNG</button>
-    </div>
-    <div class="btn-row" style="margin-top:4px">
-      <button class="ab" onclick="openAddCustom()" style="border-color:var(--accent);color:var(--accent)">＋ Add to catalog</button>
-      <button class="ab" id="btn-del-custom" onclick="deleteCustomProduct()" style="display:none">🗑 Delete</button>
     </div>
   </div>
 </div>
@@ -353,6 +506,20 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
     <div style="display:flex;gap:6px">
       <button onclick="closeAddCustom()" style="flex:1;height:30px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);font-size:11px;font-weight:700;cursor:pointer">Cancel</button>
       <button onclick="confirmAddCustom()" style="flex:1;height:30px;border:none;border-radius:var(--r);background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password modal -->
+<div id="pw-modal">
+  <div id="pw-box">
+    <h3>Edit mode</h3>
+    <p>Enter the edit password to unlock all settings</p>
+    <input type="password" id="pw-inp" placeholder="••••" maxlength="10" oninput="document.getElementById('pw-err').style.display='none'" onkeydown="if(event.key==='Enter')pwCheck()">
+    <div id="pw-err">Incorrect password</div>
+    <div class="pw-btns">
+      <button id="pw-cancel" onclick="closePwModal()">Cancel</button>
+      <button id="pw-ok" onclick="pwCheck()">Unlock</button>
     </div>
   </div>
 </div>
@@ -392,6 +559,60 @@ let fImgData={front:null,back:null,left:null,right:null,top:null,bottom:null};
 let fImgEls={front:null,back:null,left:null,right:null,top:null,bottom:null};
 let fTexCache={}; // keyed as 'face_dir' e.g. 'top_v', 'front_h'
 let showDesign=true;
+let editMode=false;
+let viewLayer=0; // 0=show all; N=show layers 1..N (step-by-step viewer)
+
+// ── mode management
+function openPwModal(){
+  const m=document.getElementById('pw-modal');
+  document.getElementById('pw-inp').value='';
+  document.getElementById('pw-err').style.display='none';
+  m.classList.add('open');
+  setTimeout(()=>document.getElementById('pw-inp').focus(),50);
+}
+function closePwModal(){document.getElementById('pw-modal').classList.remove('open');}
+function pwCheck(){
+  const v=document.getElementById('pw-inp').value;
+  if(v==='6365'){
+    closePwModal();
+    setEditMode(true);
+  } else {
+    document.getElementById('pw-err').style.display='block';
+    document.getElementById('pw-inp').value='';
+    document.getElementById('pw-inp').focus();
+  }
+}
+function setEditMode(on){
+  editMode=on;
+  document.body.classList.toggle('viewer-mode',!on);
+  document.body.classList.toggle('edit-mode',on);
+  document.getElementById('mode-label').textContent=on?'EDIT MODE':'VIEWER MODE';
+  const btn=document.getElementById('mode-btn');
+  if(on){btn.textContent='🔒 Exit edit';btn.onclick=()=>setEditMode(false);}
+  else{btn.textContent='🔓 Edit';btn.onclick=openPwModal;}
+  // viewer mode: force multiply blend ON, shadow OFF
+  if(!on){
+    useMultiply=true;
+    document.getElementById('tog-mul').classList.add('on');
+    showShadow=false;
+    document.getElementById('tog-shd').classList.remove('on');
+  } else {
+    // restore from toggles (current state of buttons)
+    useMultiply=document.getElementById('tog-mul').classList.contains('on');
+    showShadow=document.getElementById('tog-shd').classList.contains('on');
+  }
+  if(on)viewLayer=0; // clear step mode when entering edit
+  clrTexCache();
+  // rebuild catalog (viewer: only products with presets; edit: all products)
+  _rebuildCatalog();
+  // show/hide viewer product card
+  const card=document.getElementById('prod-card-wrap');
+  if(!on&&curCatIdx>=0)card.style.display='block';
+  else card.style.display='none';
+  // redraw with updated settings
+  if(lastR)draw();else{buildPallet(gv('palW'),gv('palD'));rnd.render(scene,cam);}
+}
+document.getElementById('pw-modal').addEventListener('click',function(e){if(e.target===this)closePwModal();});
 let scene,camP,camO,cam,rnd,ctrlP,ctrlO,ctrl,boxGrp,palGrp,mainGrp,lastR=null;
 let sunLight, gndMesh, gndMat;
 let curCam='iso';
@@ -897,6 +1118,12 @@ function updStats(r){
     <tr><td>Total weight (${w})</td><td>${dWt}</td></tr>
     <tr><td>Efficiency</td><td>${r.eff}%</td></tr>
   `;
+  // Update viewer card live stats
+  if(!editMode&&curCatIdx>=0){
+    document.getElementById('pc-total').textContent=r.total;
+    document.getElementById('pc-stack').textContent=`${dWt} ${w}`;
+  }
+  _layerNavRefresh();
 }
 
 // ── material builder (module-level so draw() + drawStack() share it)
@@ -921,6 +1148,37 @@ function buildMats(bx,bz,isRotated,tr,op,_bc,_tc,_imgEls){
 }
 
 // ── draw 3D
+// ── layer step nav
+function layerStep(dir){
+  if(!lastR)return;
+  const total=lastR.layers;
+  if(viewLayer===0)viewLayer=dir>0?1:total; // entering step mode
+  else viewLayer=Math.max(1,Math.min(total,viewLayer+dir));
+  _layerNavRefresh();draw();
+}
+function layerShowAll(){viewLayer=0;_layerNavRefresh();draw();}
+function layerProgressClick(e){
+  if(!lastR)return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  viewLayer=Math.max(1,Math.min(lastR.layers,Math.round(pct*lastR.layers)));
+  _layerNavRefresh();draw();
+}
+function _layerNavRefresh(){
+  const nav=document.getElementById('layer-nav');
+  if(!lastR||editMode){nav.style.display='none';return;}
+  nav.style.display='block';
+  const total=lastR.layers;
+  const cur=viewLayer||total;
+  const pct=total>0?Math.round(cur/total*100):0;
+  document.getElementById('ln-fill').style.width=pct+'%';
+  document.getElementById('ln-label').textContent=viewLayer===0?`All ${total} layers`:`Layer ${cur} / ${total}`;
+  document.getElementById('ln-prev').disabled=viewLayer<=1&&viewLayer!==0;
+  document.getElementById('ln-next').disabled=viewLayer>=total;
+  const allBtn=document.getElementById('ln-all');
+  allBtn.classList.toggle('on',viewLayer===0);
+}
+
 function draw(){
   if(stackMode){drawStack();return;}
   if(!lastR)return;
@@ -934,6 +1192,7 @@ function draw(){
 
   const baseY=ptop();
   const ly=r.lay;
+  const layersToShow=viewLayer>0?Math.min(viewLayer,r.layers):r.layers; // layer step viewer
 
   // Pre-build per-zone material sets
   let matsMain, matsAlt;
@@ -956,7 +1215,7 @@ function draw(){
     boxGrp.add(m);
   }
 
-  for(let l=0;l<r.layers;l++){
+  for(let l=0;l<layersToShow;l++){
     const yOff=baseY+l*ly.lH+ly.lH/2;
     const mir=useMirror&&l%2===1; // mirror odd layers
     if(ly.mixed){
@@ -1348,6 +1607,7 @@ function savePreset(){
     boxCol:document.getElementById('boxCol').value,
     tapeCol:document.getElementById('tapeCol').value,
     perLayer:document.getElementById('perLayer').value,
+    overhang:document.getElementById('overhang').value,
     fImgData:{...fImgData},
   };
   _savePresetsToStorage();
@@ -1388,12 +1648,24 @@ function _applyPreset(sku){
   if(p.tapeCol){document.getElementById('tapeCol').value=p.tapeCol;clrTexCache();}
   // per-layer
   if(p.perLayer!=null)document.getElementById('perLayer').value=p.perLayer;
+  // overhang — saved value overrides catalog-derived value
+  if(p.overhang!=null)document.getElementById('overhang').value=p.overhang;
   // images
   if(p.fImgData){
+    let pendingImgs=0;
     Object.keys(p.fImgData).forEach(face=>{
       if(!p.fImgData[face])return;
       fImgData[face]=p.fImgData[face];
-      const img=new Image();img.src=p.fImgData[face];fImgEls[face]=img;
+      const img=new Image();
+      pendingImgs++;
+      img.onload=()=>{
+        pendingImgs--;
+        // clear cached textures for this face so they're regenerated with the image
+        ['_v','_h','_v_R','_h_R'].forEach(s=>{delete fTexCache[face+s];});
+        if(pendingImgs===0){draw();} // redraw once all images loaded
+      };
+      img.src=p.fImgData[face];
+      fImgEls[face]=img;
       const si=document.getElementById('fi-'+face);
       si.setAttribute('href',p.fImgData[face]);si.style.display='block';
       document.getElementById('fh-'+face).classList.add('img');
@@ -1447,6 +1719,9 @@ function importPresets(input){
       Object.assign(presets,data);
       _savePresetsToStorage();
       _refreshCatalogOptions();
+      _sbImgCache={};
+      _rebuildCatalog(); // in viewer mode this now shows newly imported products
+      if(curCatIdx>=0)loadProduct(curCatIdx);
       toast(`Imported ${Object.keys(data).length} preset(s)`);
     }catch{toast('Invalid presets file');}
     input.value='';
@@ -1544,12 +1819,12 @@ function _showDeleteBtn(show){
 
 function _rebuildCatalog(){
   const sel=document.getElementById('catSel');
-  // remove all options except first placeholder
   while(sel.options.length>1)sel.remove(1);
-  // re-add built-in
   const all=[...CATALOG,...customProducts];
-  let lastCat='',grp;
+  let lastCat='',grp,hasAny=false;
   all.forEach((p,i)=>{
+    // In viewer mode: only show products that have an imported preset
+    if(!editMode&&!presets[p.sku])return;
     if(p.cat!==lastCat){
       grp=document.createElement('optgroup');grp.label=p.cat;sel.appendChild(grp);lastCat=p.cat;
     }
@@ -1562,7 +1837,14 @@ function _rebuildCatalog(){
       opt.textContent=(presets[p.sku]?'★ ':'')+`${p.name} (${p.sku})`;
     }
     grp.appendChild(opt);
+    hasAny=true;
   });
+  // Viewer: show hint when catalog is empty (no presets imported yet)
+  if(!editMode&&!hasAny){
+    const opt=document.createElement('option');
+    opt.disabled=true;opt.textContent='Import presets to load products ↑';
+    sel.appendChild(opt);
+  }
 }
 
 function loadProduct(idx){
@@ -1624,18 +1906,39 @@ function loadProduct(idx){
   document.getElementById('tapeCol').value='#ffffff';
   clrTexCache();
 
+  viewLayer=0; // reset layer step on new product
   const hadPreset=_applyPreset(p.sku);
   lslide(document.getElementById('lrange'));
   if(hadPreset&&presets[p.sku]?.varKey)_applyVariantKey(presets[p.sku].varKey);
   if(hadPreset&&presets[p.sku]?.varKey)calc();
   _presetSaveBtns(true);
+  _updateViewerCard(p);
+  _layerNavRefresh();
   toast((hadPreset?'★ ':'')+p.name);
+}
+
+function _updateViewerCard(p){
+  if(!p){document.getElementById('prod-card-wrap').style.display='none';return;}
+  document.getElementById('pc-name').textContent=p.name;
+  document.getElementById('pc-sku').textContent=p.sku;
+  const u=ul(),w=wl();
+  document.getElementById('pc-dims').textContent=`${toD(p.bW).toFixed(1)} × ${toD(p.bL).toFixed(1)} × ${toD(p.bH).toFixed(1)} ${u}`;
+  document.getElementById('pc-wt').textContent=`${wD(p.wt).toFixed(1)} ${w}`;
+  document.querySelector('#prod-card-wrap .pc-item:nth-child(1) .pc-lbl').textContent=`Box W×L×H (${u})`;
+  document.querySelector('#prod-card-wrap .pc-item:nth-child(2) .pc-lbl').textContent=`Box weight (${w})`;
+  // fill total/weight from results if available
+  const tot=document.getElementById('r-tot').textContent;
+  const wtEl=document.getElementById('r-wt').textContent;
+  document.getElementById('pc-total').textContent=tot!=='—'?tot:'…';
+  document.getElementById('pc-stack').textContent=wtEl!=='—'?`${wtEl} ${w}`:'…';
+  // show card only in viewer mode
+  if(!editMode)document.getElementById('prod-card-wrap').style.display='block';
 }
 
 // ── Stack Builder
 const STACK_COLORS=['#e2943c','#4a90d9','#5cb85c','#d9534f','#9b59b6','#f0ad4e','#1abc9c','#e67e22','#16a085','#c0392b'];
 let stackMode=false;
-let stackEntries=[]; // [{prodIdx:number, layers:number}]
+let stackEntries=[]; // [{prodIdx, layers, colOverride}]
 
 function toggleStackMode(){
   stackMode=!stackMode;
@@ -1643,56 +1946,77 @@ function toggleStackMode(){
   btn.classList.toggle('on',stackMode);
   btn.textContent=stackMode?'Active':'Enable';
   document.getElementById('sb-body').style.display=stackMode?'block':'none';
-  if(stackMode&&stackEntries.length===0){
-    _initStackEntries();
-    renderStackList();
+  if(stackMode){
+    if(stackEntries.length===0)_initStackEntries();
+    renderStackList();drawStack();
+  } else {
+    if(lastR)draw();else{buildPallet(gv('palW'),gv('palD'));rnd.render(scene,cam);}
   }
-  if(stackMode)drawStack();
-  else{if(lastR)draw();}
 }
 
 function _initStackEntries(){
+  // Seed with first two available products (heavy first)
   const all=[...CATALOG,...customProducts];
   const valid=[];
   for(let i=0;i<all.length&&valid.length<2;i++){if(!all[i].noData)valid.push(i);}
-  valid.forEach(i=>stackEntries.push({prodIdx:i,layers:3}));
+  valid.forEach(i=>stackEntries.push({prodIdx:i,layers:3,colOverride:null}));
   _sortStackByWeight();
 }
 
 function _sortStackByWeight(){
   const all=[...CATALOG,...customProducts];
+  const pW=gv('palW'),pD=gv('palD');
   stackEntries.sort((a,b)=>{
     const pa=all[a.prodIdx],pb=all[b.prodIdx];
-    const pW=gv('palW'),pD=gv('palD');
     if(!pa||!pb)return 0;
     const layA=calcLayout(pW,pD,pa.bW,pa.bL,pa.bH,0,'auto',0);
     const layB=calcLayout(pW,pD,pb.bW,pb.bL,pb.bH,0,'auto',0);
-    return (pb.wt||pb.layers||1)*(layB.per||1)*pb.wt - (pa.wt||pa.layers||1)*(layA.per||1)*pa.wt;
+    // sort descending by weight per layer (heaviest at bottom = index 0)
+    return (layB.per||0)*pb.wt - (layA.per||0)*pa.wt;
   });
 }
 
-function addStackEntry(){
+function _sbColor(entry,fallbackIdx){
+  if(entry?.colOverride)return entry.colOverride;
+  const prodIdx=entry?.prodIdx??-1;
   const all=[...CATALOG,...customProducts];
-  const used=new Set(stackEntries.map(e=>e.prodIdx));
-  let prodIdx=0;
-  for(let i=0;i<all.length;i++){if(!used.has(i)&&!all[i].noData){prodIdx=i;break;}}
-  stackEntries.push({prodIdx,layers:3});
+  const sku=prodIdx>=0&&all[prodIdx]?all[prodIdx].sku:null;
+  if(sku&&presets[sku]?.boxCol)return presets[sku].boxCol;
+  if(sku){let h=0;for(let i=0;i<sku.length;i++)h=((h<<5)-h+sku.charCodeAt(i))|0;return STACK_COLORS[Math.abs(h)%STACK_COLORS.length];}
+  return STACK_COLORS[(fallbackIdx||0)%STACK_COLORS.length];
+}
+
+function _sbImgEls2(sku){
+  // Use shared cache from _sbImgEls (same function, just alias)
+  return _sbImgEls(sku);
+}
+
+// Add from "+" dropdown
+function sbAddFromSel(sel){
+  const v=parseInt(sel.value);
+  if(v<0)return;
+  sel.value='-1';
+  stackEntries.push({prodIdx:v,layers:3,colOverride:null});
   renderStackList();drawStack();
 }
 
-function removeStackEntry(i){
-  stackEntries.splice(i,1);
-  renderStackList();drawStack();
+function sbSetColor(i,col){
+  stackEntries[i].colOverride=col;
+  // also update the card bar color immediately
+  const bars=document.querySelectorAll('.sb-card-bar');
+  if(bars[i])bars[i].style.background=col;
+  drawStack();
 }
 
 function sbSetProd(i,v){
   stackEntries[i].prodIdx=parseInt(v);
+  stackEntries[i].colOverride=null; // reset override so preset color applies
   renderStackList();drawStack();
 }
 
-function sbSetLayers(i,v){
-  stackEntries[i].layers=Math.max(1,parseInt(v)||1);
-  _updateStackStats();drawStack();
+function sbLayerAdj(i,dir){
+  stackEntries[i].layers=Math.max(1,Math.min(99,(stackEntries[i].layers||1)+dir));
+  renderStackList();drawStack();
 }
 
 function sbMove(i,dir){
@@ -1702,31 +2026,112 @@ function sbMove(i,dir){
   renderStackList();drawStack();
 }
 
-function _sbColor(prodIdx,fallbackIdx){
+function removeStackEntry(i){
+  stackEntries.splice(i,1);
+  renderStackList();drawStack();
+}
+
+function _sbRebuildAddSel(){
+  const sel=document.getElementById('sb-add-sel');
+  if(!sel)return;
+  sel.innerHTML='<option value="-1">＋ Add product to stack…</option>';
   const all=[...CATALOG,...customProducts];
-  const sku=prodIdx>=0&&all[prodIdx]?all[prodIdx].sku:null;
-  return (sku&&presets[sku]?.boxCol)||STACK_COLORS[fallbackIdx%STACK_COLORS.length];
+  // In viewer mode: only products with presets; in edit mode: all with data
+  all.forEach((p,i)=>{
+    if(p.noData)return;
+    if(!editMode&&!presets[p.sku])return;
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=p.name+(p.sku?` (${p.sku})`:'');
+    sel.appendChild(opt);
+  });
 }
 
 function renderStackList(){
   const el=document.getElementById('sb-list');
   el.innerHTML='';
+  _sbRebuildAddSel();
+
   const all=[...CATALOG,...customProducts];
-  stackEntries.forEach((entry,i)=>{
-    const col=_sbColor(entry.prodIdx,i);
-    const div=document.createElement('div');
-    div.className='sb-entry';
-    const opts=all.map((p,idx)=>`<option value="${idx}"${idx===entry.prodIdx?' selected':''}${p.noData?' disabled':''}>${p.name}${p.noData?' — no data':''}</option>`).join('');
-    div.innerHTML=
-      `<div class="sb-swatch" style="background:${col}"></div>`+
-      `<select onchange="sbSetProd(${i},this.value)">${opts}</select>`+
-      `<span class="sb-lbl">×</span>`+
-      `<input class="sb-lnum" type="number" value="${entry.layers}" min="1" max="99" onchange="sbSetLayers(${i},this.value)" title="Layers">`+
-      (i>0?`<button class="sb-del" onclick="sbMove(${i},-1)" title="Move up">↑</button>`:`<button class="sb-del" style="opacity:.3;cursor:default">↑</button>`)+
-      (i<stackEntries.length-1?`<button class="sb-del" onclick="sbMove(${i},1)" title="Move down">↓</button>`:`<button class="sb-del" style="opacity:.3;cursor:default">↓</button>`)+
-      `<button class="sb-del" onclick="removeStackEntry(${i})" title="Remove">×</button>`;
-    el.appendChild(div);
+  const pW=gv('palW'),pD=gv('palD');
+  const w=wl();
+
+  // Calc layer weight for all entries to find max (for bar scaling)
+  const weights=stackEntries.map(entry=>{
+    const p=entry.prodIdx>=0?all[entry.prodIdx]:null;
+    if(!p||p.noData)return 0;
+    const lay=calcLayout(pW,pD,p.bW,p.bL,p.bH,0,'auto',0);
+    return (lay.per||0)*p.wt;
   });
+  const maxW=Math.max(...weights,1);
+
+  if(stackEntries.length===0){
+    el.innerHTML='<div style="text-align:center;padding:14px 0;color:var(--text3);font-size:11px">Add products using the dropdown below</div>';
+    _updateStackStats();return;
+  }
+
+  // BOTTOM label
+  const btm=document.createElement('div');
+  btm.className='sb-edge';btm.textContent='▼ BOTTOM — heaviest first';
+  el.appendChild(btm);
+
+  stackEntries.forEach((entry,i)=>{
+    const p=entry.prodIdx>=0?all[entry.prodIdx]:null;
+    const col=_sbColor(entry,i);
+    const lay=p&&!p.noData?calcLayout(pW,pD,p.bW,p.bL,p.bH,0,'auto',0):null;
+    const perLayer=lay?.per||0;
+    const layerWtLb=perLayer*( p?.wt||0);
+    const wtPct=Math.round(layerWtLb/maxW*100);
+    const barHue=Math.max(0,Math.round(120-wtPct*1.2));
+    const barCol=`hsl(${barHue},68%,42%)`;
+    const dLayerWt=wD(layerWtLb).toFixed(1);
+    const totalBoxes=perLayer*entry.layers;
+
+    // Build options for selector
+    const opts=all.map((pr,idx)=>{
+      if(pr.noData)return '';
+      if(!editMode&&!presets[pr.sku])return '';
+      return `<option value="${idx}"${idx===entry.prodIdx?' selected':''}>${pr.name}${pr.sku?` (${pr.sku})`:''}</option>`;
+    }).join('');
+
+    const card=document.createElement('div');
+    card.className='sb-card';
+    card.innerHTML=
+      // Left color bar = clickable color picker
+      `<label class="sb-card-bar" style="background:${col}" title="Click to change colour">`+
+        `<input type="color" value="${col}" style="opacity:0;position:absolute;width:0;height:0" onchange="sbSetColor(${i},this.value)">`+
+      `</label>`+
+      `<div class="sb-card-body">`+
+        // Row 1: product selector + action buttons
+        `<div class="sb-card-head">`+
+          `<select class="sb-card-sel" onchange="sbSetProd(${i},this.value)">${opts}</select>`+
+          `<button class="sb-act" onclick="sbMove(${i},-1)" title="Move up" ${i===0?'disabled':''}>↑</button>`+
+          `<button class="sb-act" onclick="sbMove(${i},1)" title="Move down" ${i===stackEntries.length-1?'disabled':''}>↓</button>`+
+          `<button class="sb-act del" onclick="removeStackEntry(${i})" title="Remove">×</button>`+
+        `</div>`+
+        // Row 2: meta info
+        `<div class="sb-card-meta">`+
+          (perLayer?`<b>${perLayer}</b> boxes/layer · <b>${dLayerWt}</b> ${w}/layer`:'no data')+
+        `</div>`+
+        // Row 3: layer count + weight bar
+        `<div class="sb-card-foot">`+
+          `<button class="sb-layer-btn" onclick="sbLayerAdj(${i},-1)">−</button>`+
+          `<span class="sb-layer-val">${entry.layers}</span>`+
+          `<button class="sb-layer-btn" onclick="sbLayerAdj(${i},1)">+</button>`+
+          `<span class="sb-layer-lbl">layer${entry.layers>1?'s':''} · ${totalBoxes} boxes</span>`+
+          `<div class="sb-wt-wrap">`+
+            `<div class="sb-wt-bar"><div class="sb-wt-fill" style="width:${wtPct}%;background:${barCol}"></div></div>`+
+          `</div>`+
+        `</div>`+
+      `</div>`;
+    el.appendChild(card);
+  });
+
+  // TOP label
+  const top=document.createElement('div');
+  top.className='sb-edge';top.textContent='▲ TOP — lightest last';
+  el.appendChild(top);
+
   _updateStackStats();
 }
 
@@ -1735,27 +2140,26 @@ function _updateStackStats(){
   if(!stackMode||!stackEntries.length){el.innerHTML='';return;}
   const all=[...CATALOG,...customProducts];
   const pW=gv('palW'),pD=gv('palD');
-  let totalBoxes=0,totalWtLb=30;
-  let rows='<div style="border-top:1px solid var(--border);padding-top:5px">';
-  stackEntries.forEach((entry,i)=>{
+  const w=wl();
+  let totalBoxes=0,totalWtLb=30,totalLayers=0;
+
+  stackEntries.forEach(entry=>{
     const p=entry.prodIdx>=0?all[entry.prodIdx]:null;
-    if(!p)return;
+    if(!p||p.noData)return;
     const lay=calcLayout(pW,pD,p.bW,p.bL,p.bH,0,'auto',0);
-    const boxes=lay.per*entry.layers;
+    const boxes=(lay.per||0)*entry.layers;
     totalBoxes+=boxes;
     totalWtLb+=boxes*p.wt;
-    const col=_sbColor(entry.prodIdx,i);
-    rows+=`<div style="display:flex;align-items:center;gap:5px;padding:2px 0;font-size:10px">`+
-      `<div class="sb-swatch" style="background:${col}"></div>`+
-      `<span style="flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>`+
-      `<span style="font-weight:700;color:var(--text);white-space:nowrap">${boxes} boxes</span>`+
-      `</div>`;
+    totalLayers+=entry.layers;
   });
+
   const dWt=wD(totalWtLb).toFixed(0);
-  rows+=`<div style="display:flex;justify-content:space-between;padding:4px 0 0;border-top:1px solid var(--border);margin-top:3px;font-size:11px">`+
-    `<span style="font-weight:800">Total</span>`+
-    `<span style="font-weight:800;color:var(--accent)">${totalBoxes} boxes · ${dWt} ${wl()}</span></div></div>`;
-  el.innerHTML=rows;
+  el.innerHTML=
+    `<div class="sb-total">`+
+      `<div class="sb-total-row"><span class="sb-total-lbl">Total layers</span><span class="sb-total-val">${totalLayers}</span></div>`+
+      `<div class="sb-total-row"><span class="sb-total-lbl">Total boxes</span><span class="sb-total-val">${totalBoxes}</span></div>`+
+      `<div class="sb-total-row"><span class="sb-total-lbl">Pallet weight</span><span class="sb-total-val acc">${dWt} ${w}</span></div>`+
+    `</div>`;
 }
 
 // Inner layer-drawing helper used by both draw() and drawStack()
@@ -1828,15 +2232,22 @@ function _drawLayerBoxes(ly,yOff,mir,matsMain,matsAlt,placeBox){
 }
 
 // Cache Image objects for stack builder presets (keyed by sku+face)
-const _sbImgCache={};
+let _sbImgCache={};
 function _sbImgEls(sku){
   const preset=presets[sku];
   if(!preset?.fImgData)return {};
   const els={};
+  let pending=0;
   Object.keys(preset.fImgData).forEach(f=>{
     if(!preset.fImgData[f])return;
     const k=sku+'_'+f;
-    if(!_sbImgCache[k]){const img=new Image();img.src=preset.fImgData[f];_sbImgCache[k]=img;}
+    if(!_sbImgCache[k]){
+      const img=new Image();
+      pending++;
+      img.onload=()=>{pending--;if(pending===0)drawStack();};
+      img.src=preset.fImgData[f];
+      _sbImgCache[k]=img;
+    }
     els[f]=_sbImgCache[k];
   });
   return els;
@@ -1872,7 +2283,7 @@ function drawStack(){
 
     // Use preset colors/images if saved, else fall back to palette color
     const preset=presets[p.sku];
-    const bc=preset?.boxCol||_sbColor(entry.prodIdx,ei);
+    const bc=_sbColor(entry,ei); // entry.colOverride → preset.boxCol → hash fallback
     const tc=preset?.tapeCol||'#ffffff';
     const imgEls=_sbImgEls(p.sku);
 
@@ -1909,7 +2320,12 @@ initThree();
 _loadCustom();
 _loadPresetsFromStorage();
 _rebuildCatalog();
-updPP();calc();
+updPP();
+// Start in viewer mode — draw empty pallet, no product pre-selected
+setEditMode(false);
+// Draw empty pallet without any boxes (just render the pallet base)
+buildPallet(gv('palW'),gv('palD'));
+rnd.render(scene,cam);
 </script>
 </body>
 </html>
