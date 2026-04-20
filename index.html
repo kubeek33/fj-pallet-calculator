@@ -241,6 +241,7 @@ body{display:flex;height:100vh;overflow:hidden;background:var(--bg2);color:var(-
       <button class="tog on" id="tog-mir" onclick="toggleMirror()">Mirror layers</button>
       <button class="tog" id="tog-mul" onclick="toggleMultiply()">Multiply blend</button>
       <button class="tog on" id="tog-shd" onclick="toggleShadow()">Shadow</button>
+      <button class="tog on" id="tog-dsn" onclick="toggleDesign()">Show design</button>
     </div>
     <div class="face-hint">Click a face → paste image (Cmd/Ctrl+V)</div>
     <div class="face-svg-wrap">
@@ -390,6 +391,7 @@ let interlockVars=[];
 let fImgData={front:null,back:null,left:null,right:null,top:null,bottom:null};
 let fImgEls={front:null,back:null,left:null,right:null,top:null,bottom:null};
 let fTexCache={}; // keyed as 'face_dir' e.g. 'top_v', 'front_h'
+let showDesign=true;
 let scene,camP,camO,cam,rnd,ctrlP,ctrlO,ctrl,boxGrp,palGrp,mainGrp,lastR=null;
 let sunLight, gndMesh, gndMat;
 let curCam='iso';
@@ -504,6 +506,11 @@ function toggleShadow(){
   if(sunLight)sunLight.castShadow=showShadow;
   if(gndMat)gndMat.opacity=showShadow?0.12:0;
 }
+function toggleDesign(){
+  showDesign=!showDesign;
+  document.getElementById('tog-dsn').classList.toggle('on',showDesign);
+  clrTexCache();draw();
+}
 
 // ── face interactions
 function setFace(f){
@@ -522,7 +529,7 @@ window.addEventListener('paste',e=>{
     img.onload=()=>{
       fImgData[activeFace]=ev.target.result;
       fImgEls[activeFace]=img;
-      fTexCache[activeFace]=null;
+      ['_v','_h'].forEach(s=>{delete fTexCache[activeFace+s];});
       const si=document.getElementById('fi-'+activeFace);
       si.setAttribute('href',ev.target.result);si.style.display='block';
       document.getElementById('fh-'+activeFace).classList.add('img');
@@ -534,7 +541,7 @@ window.addEventListener('paste',e=>{
 });
 
 function clearFace(f){
-  fImgData[f]=null;fImgEls[f]=null;fTexCache[f]=null;
+  fImgData[f]=null;fImgEls[f]=null;['_v','_h'].forEach(s=>{delete fTexCache[f+s];});
   const si=document.getElementById('fi-'+f);si.style.display='none';si.removeAttribute('href');
   document.getElementById('fh-'+f).classList.remove('img');
   updFClears();draw();
@@ -551,13 +558,15 @@ function updFClears(){
 // tapeDir: 'v' = tape runs along Z (vertical on top) → wraps FRONT+BACK
 //          'h' = tape runs along X (horizontal on top) → wraps LEFT+RIGHT
 // Rule: if bz > bx → 'h', else 'v'  (tape runs along the LONGER top dimension)
-function getFTex(face, tapeDir='v'){
-  const key=`${face}_${tapeDir}`;
-  if(fTexCache[key])return fTexCache[key];
+// _bc/_tc/_ie: optional per-product overrides (skips global cache when set)
+function getFTex(face, tapeDir='v', _bc, _tc, _ie, _rot90){
+  const key=`${face}_${tapeDir}${_rot90?'_R':''}`;
+  const useCache=!_bc&&!_tc&&_ie===undefined;
+  if(useCache&&fTexCache[key])return fTexCache[key];
   const cv=document.createElement('canvas');cv.width=512;cv.height=512;
   const ctx=cv.getContext('2d');
-  const base=document.getElementById('boxCol').value;
-  const tape=document.getElementById('tapeCol').value;
+  const base=_bc||document.getElementById('boxCol').value;
+  const tape=_tc||document.getElementById('tapeCol').value;
 
   ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
   // cardboard grain
@@ -596,14 +605,21 @@ function getFTex(face, tapeDir='v'){
   sg.addColorStop(0,'rgba(255,255,255,.1)');sg.addColorStop(1,'rgba(0,0,0,.1)');
   ctx.fillStyle=sg;ctx.fillRect(0,0,512,512);
 
-  if(fImgEls[face]){
+  const _img=_ie!==undefined?_ie:fImgEls[face];
+  if(_img){
     if(useMultiply)ctx.globalCompositeOperation='multiply';
-    ctx.drawImage(fImgEls[face],0,0,512,512);
+    if(_rot90){
+      ctx.save();ctx.translate(256,256);ctx.rotate(Math.PI/2);
+      ctx.drawImage(_img,-256,-256,512,512);ctx.restore();
+    } else {
+      ctx.drawImage(_img,0,0,512,512);
+    }
     ctx.globalCompositeOperation='source-over';
   }
 
-  fTexCache[key]=new THREE.CanvasTexture(cv);
-  return fTexCache[key];
+  const tex=new THREE.CanvasTexture(cv);
+  if(useCache)fTexCache[key]=tex;
+  return tex;
 }
 
 // ── pallet
@@ -883,6 +899,27 @@ function updStats(r){
   `;
 }
 
+// ── material builder (module-level so draw() + drawStack() share it)
+// _bc/_tc: optional color overrides; _imgEls: optional {face→Image} map
+function buildMats(bx,bz,isRotated,tr,op,_bc,_tc,_imgEls){
+  const td=bz>bx?'v':'h';
+  const sd=isRotated?(td==='v'?'h':'v'):td; // flip tapeDir for rotated side faces
+  const faces=isRotated
+    ?['front','back','top','bottom','left','right']   // 90° CW remap
+    :['right','left','top','bottom','front','back'];  // standard
+  if(!showDesign&&!_bc){
+    const c=new THREE.Color(document.getElementById('boxCol').value);
+    return [1.0,0.82,1.1,0.68,0.92,0.78].map(b=>
+      new THREE.MeshStandardMaterial({color:c.clone().multiplyScalar(Math.min(b,1)),roughness:.82,metalness:.04,transparent:tr,opacity:op}));
+  }
+  return faces.map(f=>{
+    const tdir=f==='top'||f==='bottom'?td:sd;
+    const ie=_imgEls?_imgEls[f]:undefined;
+    const r90=isRotated&&(f==='top'||f==='bottom');
+    return new THREE.MeshStandardMaterial({map:getFTex(f,tdir,_bc,_tc,ie,r90),roughness:.82,metalness:.04,transparent:tr,opacity:op});
+  });
+}
+
 // ── draw 3D
 function draw(){
   if(stackMode){drawStack();return;}
@@ -893,22 +930,7 @@ function draw(){
 
   const op=parseFloat(document.getElementById('opRange').value)/100;
   const tr=op<1;
-  const emAt=new THREE.LineBasicMaterial({color:0x000,transparent:true,opacity:.12});
-
-  // Build material set for a given box footprint (bx × bz).
-  // tapeDir: 'v' if bx>=bz, 'h' if bz>bx
-  // THREE face slot order: [+X right, -X left, +Y top, -Y bottom, +Z front, -Z back]
-  // isRotated=false (flat):    slot→image: right,left,top,bottom,front,back
-  // isRotated=true  (rot 90°): box turned CW → original front is now at +X slot
-  //   slot→image: front,back,top,bottom,left,right
-  function buildMats(bx,bz,isRotated){
-    const td=bz>bx?'v':'h';
-    const sd=isRotated?(td==='v'?'h':'v'):td; // flipped for rotated side faces
-    const faces=isRotated
-      ?['front','back','top','bottom','left','right']   // 90° CW remap
-      :['right','left','top','bottom','front','back'];  // standard
-    return faces.map(f=>new THREE.MeshStandardMaterial({map:getFTex(f,f==='top'||f==='bottom'?td:sd),roughness:.82,metalness:.04,transparent:tr,opacity:op}));
-  }
+  const emAt=new THREE.LineBasicMaterial({color:0x111111,transparent:true,opacity:.28});
 
   const baseY=ptop();
   const ly=r.lay;
@@ -918,11 +940,11 @@ function draw(){
   if(ly.mixed){
     const bxA=ly.bXA||ly.bXFlat, bzA=ly.bZA||ly.bZFlat;
     const bxB=ly.bXB||ly.bXRot, bzB=ly.bZB||ly.bZRot;
-    matsMain=buildMats(bxA,bzA,false);  // flat zone — original orientation
-    matsAlt =buildMats(bxB,bzB,true);   // rotated zone — 90° remap
+    matsMain=buildMats(bxA,bzA,false,tr,op);
+    matsAlt =buildMats(bxB,bzB,true,tr,op);
   } else {
     const isRot=ly.label==='rotated';
-    matsMain=buildMats(ly.bX,ly.bZ,isRot);
+    matsMain=buildMats(ly.bX,ly.bZ,isRot,tr,op);
     matsAlt=matsMain;
   }
 
@@ -1020,15 +1042,26 @@ function draw(){
     const lm=new THREE.LineBasicMaterial({color:0x1a6aff,transparent:true,opacity:.5});
     const hw=r.pW/2,hd=r.pD/2,y=baseY+r.stackH+0.5;
     const lines=[
-      [[-hw,y,-hd],[-hw,y,hd]],  // left pallet edge
-      [[hw,y,-hd],[hw,y,hd]],    // right pallet edge
-      [[-hw,y,-hd],[hw,y,-hd]],  // front pallet edge
-      [[-hw,y,hd],[hw,y,hd]],    // back pallet edge
+      [[-hw,y,-hd],[-hw,y,hd]],[[ hw,y,-hd],[ hw,y,hd]],
+      [[-hw,y,-hd],[ hw,y,-hd]],[[-hw,y, hd],[ hw,y, hd]],
     ];
     lines.forEach(([a,b])=>{
       const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]);
       boxGrp.add(new THREE.Line(g,lm));
     });
+  }
+  // dashed pallet perimeter (always visible in top view)
+  if(curCam==='top'){
+    const hw=r.pW/2,hd=r.pD/2,y=baseY+r.stackH+1.5;
+    const pts=[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd],[-hw,-hd]]
+      .map(([x,z])=>new THREE.Vector3(x,y,z));
+    const dl=new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineDashedMaterial({color:0xd4161a,dashSize:3.5,gapSize:2,transparent:true,opacity:1,depthTest:false,depthWrite:false})
+    );
+    dl.computeLineDistances();
+    dl.renderOrder=999;
+    boxGrp.add(dl);
   }
 }
 
@@ -1135,7 +1168,7 @@ function setCam(t){
     if(t==='side')camP.position.set(c.x+d*1.3,c.y+s.y*.25,c.z);
     ctrlP.update();
   }
-  if(lastR)updStats(lastR);
+  if(lastR){updStats(lastR);draw();}
 }
 
 // ── export
@@ -1207,24 +1240,58 @@ function dlb(blob){const u=URL.createObjectURL(blob);const a=document.createElem
 
 // ── product catalog
 const CATALOG=[
+  // Wide Mouth
   {cat:'Wide Mouth',name:'12 Lids Wide',sku:'FJ-LW-12',bW:13,bL:7.5,bH:4,wt:7.3,pW:48,pD:40,mH:66,layers:15},
+  {cat:'Wide Mouth',name:'24 Lids Wide',sku:'FJ-LW-24',noData:true},
   {cat:'Wide Mouth',name:'50 Lids Wide',sku:'FJ-LW-50',bW:19,bL:15,bH:8.5,wt:44,pW:48,pD:40,mH:65,layers:7},
   {cat:'Wide Mouth',name:'100 Lids Wide',sku:'FJ-LW-100',bW:19,bL:15,bH:8.5,wt:44.4,pW:48,pD:40,mH:65,layers:7},
   {cat:'Wide Mouth',name:'12 Lids & Rings Wide',sku:'FJ-LRW-12',bW:19,bL:15,bH:7,wt:15.5,pW:48,pD:40,mH:69,layers:9},
   {cat:'Wide Mouth',name:'24 Lids & Rings Wide',sku:'FJ-LRW-24',bW:20,bL:13.5,bH:15,wt:29.5,pW:48,pD:40,mH:66,layers:4},
+  // Regular Mouth
   {cat:'Regular Mouth',name:'12 Lids Regular',sku:'FJ-LR-12',bW:12.5,bL:6.5,bH:3.5,wt:4.9,pW:48,pD:40,mH:60,layers:15},
   {cat:'Regular Mouth',name:'50 Lids Regular',sku:'FJ-LR-50',bW:16,bL:12,bH:8.5,wt:30.8,pW:48,pD:40,mH:65,layers:7},
   {cat:'Regular Mouth',name:'100 Lids Regular',sku:'FJ-LR-100',bW:15.5,bL:12.5,bH:8.5,wt:30.3,pW:48,pD:40,mH:65,layers:7},
   {cat:'Regular Mouth',name:'12 Lids & Rings Regular',sku:'FJ-LRR-12',bW:16,bL:12,bH:7,wt:10.5,pW:48,pD:40,mH:69,layers:9},
   {cat:'Regular Mouth',name:'24 Lids & Rings Regular',sku:'FJ-LRR-24',bW:16,bL:13,bH:12.5,wt:19.8,pW:48,pD:40,mH:69,layers:5},
+  // Gem Mouth
   {cat:'Gem Mouth',name:'50 Lids Gem',sku:'FJ-LG-50',bW:16,bL:12,bH:8.5,wt:35.7,pW:48,pD:40,mH:63,layers:7},
-  {cat:'Rings',name:'100 Rings Gem',sku:'FJ-CB-G100',bW:17,bL:6.5,bH:8.5,wt:3.4,pW:48,pD:40,mH:65,layers:7},
-  {cat:'Rings',name:'100 Rings Regular',sku:'FJ-RB-100',bW:15.5,bL:5.5,bH:6.5,wt:2.2,pW:48,pD:40,mH:67,layers:10},
+  {cat:'Gem Mouth',name:'100 Lids Gem',sku:'FJ-LG-100',noData:true},
+  {cat:'Gem Mouth',name:'12 Lids & Rings Gem',sku:'FJ-LRG-12',noData:true},
+  // Rings
+  {cat:'Rings',name:'100 Rings Gem',sku:'FJ-RG-100',bW:17,bL:6.5,bH:8.5,wt:3.4,pW:48,pD:40,mH:65,layers:7},
+  {cat:'Rings',name:'100 Rings Regular',sku:'FJ-RR-100',bW:15.5,bL:5.5,bH:6.5,wt:2.2,pW:48,pD:40,mH:67,layers:10},
   {cat:'Rings',name:'100 Rings Wide',sku:'FJ-RW-100',bW:18,bL:6,bH:7.5,wt:3.2,pW:48,pD:40,mH:65,layers:8},
+  // Accessories
+  {cat:'Accessories',name:'Anti Fatigue Floor Mat',sku:'FFM-B/S/G',noData:true},
   {cat:'Accessories',name:'Kitchen Timer',sku:'FKT-SS',bW:17.5,bL:15,bH:14,wt:37,pW:48,pD:40,mH:61,layers:4},
+  {cat:'Accessories',name:'Microfiber Waffle Towel White',sku:'FJ-WT-G/W',noData:true},
+  {cat:'Accessories',name:'Microfiber Waffle Towel Gray',sku:'FJ-WT-GRY',noData:true},
+  {cat:'Accessories',name:'Microfiber Waffle Towel Christmas',sku:'FJ-WT-XMAS',noData:true},
+  {cat:'Accessories',name:'Microfiber Waffle Towel Graphic 12-pack',sku:'FJ-WT-NC',noData:true},
+  {cat:'Accessories',name:'Microfiber Waffle Towel Autumn',sku:'FJ-WT-AUT',noData:true},
+  {cat:'Accessories',name:'Vacuum Sealer Kit',sku:'FJ-VSK',bW:23,bL:15.5,bH:13,wt:32,pW:48,pD:40,mH:67,layers:5},
   {cat:'Accessories',name:'Pressure Canner',sku:'FJ-PC23L',bW:16,bL:16,bH:16,wt:17,pW:48,pD:40,mH:86,layers:5},
-  {cat:'Accessories',name:'Funnel Set',sku:'FJ-FS',bW:14,bL:14,bH:22,wt:25.7,pW:48,pD:40,mH:70,layers:3},
-  {cat:'Vacuum Sealer',name:'VS Pro Machine',sku:'FJ-VSM',bW:18.5,bL:11,bH:20.5,wt:34.5,pW:48,pD:40,mH:67,layers:6},
+  {cat:'Accessories',name:'Measuring Cups & Spoons Set',sku:'FJ-MC&S',noData:true},
+  {cat:'Accessories',name:'Jar Opener',sku:'FJ-JO',bW:13.5,bL:9,bH:17,wt:15,pW:49,pD:40,mH:58,layers:3},
+  {cat:'Accessories',name:'Funnel Set',sku:'FJ-FS',bW:14,bL:14,bH:22,wt:25.7,pW:48,pD:41,mH:72,layers:3},
+  {cat:'Accessories',name:'Burlap Tote Bag Small',sku:'FJ-BT-S',noData:true},
+  {cat:'Accessories',name:'Burlap Tote Bag Medium',sku:'FJ-BT-M',noData:true},
+  // Vacuum Sealer
+  {cat:'Vacuum Sealer',name:'VS Pro Machine',sku:'FJ-VSM',bW:18.5,bL:12,bH:20.5,wt:34.5,pW:48,pD:40,mH:63,layers:3},
+  {cat:'Vacuum Sealer',name:'VS Roll 8" (50ct)',sku:'FJ-VSR-8/50',bW:16.5,bL:13,bH:11.5,wt:22.1,pW:48,pD:40,mH:63,layers:5},
+  {cat:'Vacuum Sealer',name:'VS Roll 11" (50ct)',sku:'FJ-VSR-11/50',bW:16.5,bL:13,bH:14.5,wt:29.3,pW:48,pD:40,mH:64,layers:4},
+  {cat:'Vacuum Sealer',name:'VS Roll 8" (150ct)',sku:'FJ-VSR-8/150',bW:21,bL:14,bH:11,wt:30.3,pW:48,pD:40,mH:61,layers:5},
+  {cat:'Vacuum Sealer',name:'VS Roll 11" (150ct)',sku:'FJ-VSR-11/150',bW:21,bL:14,bH:14.5,wt:40.2,pW:48,pD:42,mH:64,layers:4},
+  {cat:'Vacuum Sealer',name:'24oz Mylar Bags (50ct)',sku:'FJ-MB-24oz/50',bW:15,bL:9,bH:17.5,wt:22,pW:48,pD:40,mH:58,layers:3},
+  {cat:'Vacuum Sealer',name:'64oz Mylar Bags (50ct)',sku:'FJ-MB-64oz/50',bW:20.5,bL:13,bH:17,wt:44,pW:48,pD:40,mH:57,layers:3},
+  {cat:'Vacuum Sealer',name:'1 Gallon Mylar Bags (50ct)',sku:'FJ-MB-1gal/50',bW:16,bL:14,bH:17,wt:33,pW:48,pD:40,mH:57,layers:3},
+  {cat:'Vacuum Sealer',name:'6x9 VS Bags (100ct)',sku:'FJ-VSB-6x9/100',bW:20,bL:11.5,bH:8,wt:25.3,pW:48,pD:40,mH:62,layers:7},
+  {cat:'Vacuum Sealer',name:'8x12 VS Bags (100ct)',sku:'FJ-VSB-8x12/100',bW:21,bL:14.5,bH:10,wt:37.2,pW:48,pD:40,mH:66,layers:6},
+  {cat:'Vacuum Sealer',name:'11x16 VS Bags (100ct)',sku:'FJ-VSB-11x16/100',bW:21,bL:18,bH:13,wt:70.7,pW:48,pD:40,mH:58,layers:4},
+  {cat:'Vacuum Sealer',name:'6x9 VS Bags (200ct)',sku:'FJ-VSB-6x9/200',bW:20,bL:12,bH:8,wt:23.8,pW:48,pD:40,mH:62,layers:7},
+  {cat:'Vacuum Sealer',name:'8x12 VS Bags (200ct)',sku:'FJ-VSB-8x12/200',bW:19.5,bL:14.5,bH:10,wt:38.7,pW:48,pD:40,mH:66,layers:6},
+  {cat:'Vacuum Sealer',name:'11x16 VS Bags (200ct)',sku:'FJ-VSB-11x16/200',bW:20,bL:18,bH:13,wt:67.4,pW:48,pD:40,mH:58,layers:4},
+  // Jars
   {cat:'Jars',name:'Mason 4oz/12 Regular',sku:'FMJ-4oz-12-R',bW:13,bL:10,bH:3,wt:4.3,pW:48,pD:40,mH:61,layers:20},
   {cat:'Jars',name:'Mason 8oz/12 Regular',sku:'FMJ-8oz-12-R',bW:13,bL:10,bH:5,wt:6.9,pW:48,pD:40,mH:66,layers:13},
   {cat:'Jars',name:'Mason 16oz/12 Wide',sku:'FMJ-16oz-12-W',bW:15,bL:11.5,bH:5.5,wt:9.2,pW:48,pD:40,mH:66,layers:11},
@@ -1336,7 +1403,7 @@ function _applyPreset(sku){
   // orientation
   if(p.orient&&p.orient!==orient){
     orient=p.orient;
-    ['auto','interlock','mixed','flat','rot'].forEach(x=>document.getElementById('ob-'+x).classList.toggle('on',x===p.orient));
+    ['auto','interlock','mixed','flat','rot'].forEach(x=>{const el=document.getElementById('ob-'+x);if(el)el.classList.toggle('on',x===p.orient);});
     if(p.orient==='interlock'){
       if(!useMirror){useMirror=true;document.getElementById('tog-mir').classList.add('on');}
       document.getElementById('var-list').style.display='flex';
@@ -1488,7 +1555,12 @@ function _rebuildCatalog(){
     }
     const opt=document.createElement('option');
     opt.value=i;opt.dataset.ci=i;
-    opt.textContent=(presets[p.sku]?'★ ':'')+`${p.name} (${p.sku})`;
+    if(p.noData){
+      opt.disabled=true;
+      opt.textContent=`${p.name} (${p.sku||'—'}) — no data`;
+    } else {
+      opt.textContent=(presets[p.sku]?'★ ':'')+`${p.name} (${p.sku})`;
+    }
     grp.appendChild(opt);
   });
 }
@@ -1496,8 +1568,9 @@ function _rebuildCatalog(){
 function loadProduct(idx){
   const all=[...CATALOG,...customProducts];
   if(idx<0||idx>=all.length)return;
-  curCatIdx=idx;
   const p=all[idx];
+  if(p.noData){toast(`${p.name}: no data available`);document.getElementById('catSel').value=curCatIdx>=0?curCatIdx:-1;return;}
+  curCatIdx=idx;
   const isCustom=p.cat==='Custom';
   _showDeleteBtn(isCustom);
 
@@ -1509,20 +1582,30 @@ function loadProduct(idx){
   });
   updFClears();clrTexCache();
 
+  // If product's pallet is non-standard (e.g. 49×40, 48×42), snap to 48×40
+  // and treat the excess as overhang (per-side).
+  let effPW=p.pW,effPD=p.pD,effOh=0;
+  const stdW=48,stdD=40;
+  if(p.pW>stdW||p.pD>stdD){
+    effOh=Math.max(p.pW-stdW,p.pD-stdD);
+    effPW=stdW;effPD=stdD;
+  }
   if(unit==='cm'){
     document.getElementById('boxW').value=+(p.bW*IC).toFixed(1);
     document.getElementById('boxL').value=+(p.bL*IC).toFixed(1);
     document.getElementById('boxH').value=+(p.bH*IC).toFixed(1);
     document.getElementById('boxWt').value=+(p.wt*0.453592).toFixed(2);
-    document.getElementById('palW').value=+(p.pW*IC).toFixed(1);
-    document.getElementById('palD').value=+(p.pD*IC).toFixed(1);
+    document.getElementById('palW').value=+(effPW*IC).toFixed(1);
+    document.getElementById('palD').value=+(effPD*IC).toFixed(1);
+    document.getElementById('overhang').value=+(effOh*IC).toFixed(1);
   } else {
     document.getElementById('boxW').value=p.bW;
     document.getElementById('boxL').value=p.bL;
     document.getElementById('boxH').value=p.bH;
     document.getElementById('boxWt').value=+(p.wt).toFixed(1);
-    document.getElementById('palW').value=p.pW;
-    document.getElementById('palD').value=p.pD;
+    document.getElementById('palW').value=effPW;
+    document.getElementById('palD').value=effPD;
+    document.getElementById('overhang').value=effOh;
   }
   document.getElementById('perLayer').value=0;
   document.getElementById('maxL').value=p.layers;
@@ -1531,7 +1614,15 @@ function loadProduct(idx){
   autoH=true;document.getElementById('ah-btn').classList.add('on');
   const inp=document.getElementById('palMaxH');inp.disabled=true;inp.style.opacity='0.5';
   document.querySelectorAll('.pal-pre').forEach(e=>e.classList.remove('on'));
-  PALS.forEach((pp,i)=>{if(pp.w===p.pW&&pp.d===p.pD)document.getElementById('pp'+i).classList.add('on');});
+  PALS.forEach((pp,i)=>{if(pp.w===effPW&&pp.d===effPD)document.getElementById('pp'+i).classList.add('on');});
+
+  // reset to defaults so no settings bleed from previous product
+  orient='auto';selVar=-1;
+  ['auto','interlock'].forEach(x=>document.getElementById('ob-'+x)?.classList.toggle('on',x==='auto'));
+  document.getElementById('var-list').style.display='none';
+  document.getElementById('boxCol').value='#e2943c';
+  document.getElementById('tapeCol').value='#ffffff';
+  clrTexCache();
 
   const hadPreset=_applyPreset(p.sku);
   lslide(document.getElementById('lrange'));
@@ -1553,41 +1644,62 @@ function toggleStackMode(){
   btn.textContent=stackMode?'Active':'Enable';
   document.getElementById('sb-body').style.display=stackMode?'block':'none';
   if(stackMode&&stackEntries.length===0){
-    const all=[...CATALOG,...customProducts];
-    stackEntries.push({prodIdx:Math.min(0,all.length-1),layers:3});
-    if(all.length>1)stackEntries.push({prodIdx:1,layers:3});
+    _initStackEntries();
     renderStackList();
   }
   if(stackMode)drawStack();
   else{if(lastR)draw();}
 }
 
+function _initStackEntries(){
+  const all=[...CATALOG,...customProducts];
+  const valid=[];
+  for(let i=0;i<all.length&&valid.length<2;i++){if(!all[i].noData)valid.push(i);}
+  valid.forEach(i=>stackEntries.push({prodIdx:i,layers:3}));
+  _sortStackByWeight();
+}
+
+function _sortStackByWeight(){
+  const all=[...CATALOG,...customProducts];
+  stackEntries.sort((a,b)=>{
+    const pa=all[a.prodIdx],pb=all[b.prodIdx];
+    const pW=gv('palW'),pD=gv('palD');
+    if(!pa||!pb)return 0;
+    const layA=calcLayout(pW,pD,pa.bW,pa.bL,pa.bH,0,'auto',0);
+    const layB=calcLayout(pW,pD,pb.bW,pb.bL,pb.bH,0,'auto',0);
+    return (pb.wt||pb.layers||1)*(layB.per||1)*pb.wt - (pa.wt||pa.layers||1)*(layA.per||1)*pa.wt;
+  });
+}
+
 function addStackEntry(){
   const all=[...CATALOG,...customProducts];
   const used=new Set(stackEntries.map(e=>e.prodIdx));
   let prodIdx=0;
-  for(let i=0;i<all.length;i++){if(!used.has(i)){prodIdx=i;break;}}
+  for(let i=0;i<all.length;i++){if(!used.has(i)&&!all[i].noData){prodIdx=i;break;}}
   stackEntries.push({prodIdx,layers:3});
-  renderStackList();
-  drawStack();
+  renderStackList();drawStack();
 }
 
 function removeStackEntry(i){
   stackEntries.splice(i,1);
-  renderStackList();
-  drawStack();
+  renderStackList();drawStack();
 }
 
 function sbSetProd(i,v){
-  stackEntries[i].prodIdx=v;
-  renderStackList();
-  drawStack();
+  stackEntries[i].prodIdx=parseInt(v);
+  renderStackList();drawStack();
 }
 
 function sbSetLayers(i,v){
   stackEntries[i].layers=Math.max(1,parseInt(v)||1);
-  _updateStackStats();
-  drawStack();
+  _updateStackStats();drawStack();
+}
+
+function sbMove(i,dir){
+  const j=i+dir;
+  if(j<0||j>=stackEntries.length)return;
+  [stackEntries[i],stackEntries[j]]=[stackEntries[j],stackEntries[i]];
+  renderStackList();drawStack();
 }
 
 function _sbColor(prodIdx,fallbackIdx){
@@ -1604,13 +1716,15 @@ function renderStackList(){
     const col=_sbColor(entry.prodIdx,i);
     const div=document.createElement('div');
     div.className='sb-entry';
-    const opts=all.map((p,idx)=>`<option value="${idx}"${idx===entry.prodIdx?' selected':''}>${p.name}</option>`).join('');
+    const opts=all.map((p,idx)=>`<option value="${idx}"${idx===entry.prodIdx?' selected':''}${p.noData?' disabled':''}>${p.name}${p.noData?' — no data':''}</option>`).join('');
     div.innerHTML=
       `<div class="sb-swatch" style="background:${col}"></div>`+
-      `<select onchange="sbSetProd(${i},parseInt(this.value))">${opts}</select>`+
+      `<select onchange="sbSetProd(${i},this.value)">${opts}</select>`+
       `<span class="sb-lbl">×</span>`+
-      `<input class="sb-lnum" type="number" value="${entry.layers}" min="1" max="99" onchange="sbSetLayers(${i},this.value)" title="Number of layers">`+
-      `<button class="sb-del" onclick="removeStackEntry(${i})">×</button>`;
+      `<input class="sb-lnum" type="number" value="${entry.layers}" min="1" max="99" onchange="sbSetLayers(${i},this.value)" title="Layers">`+
+      (i>0?`<button class="sb-del" onclick="sbMove(${i},-1)" title="Move up">↑</button>`:`<button class="sb-del" style="opacity:.3;cursor:default">↑</button>`)+
+      (i<stackEntries.length-1?`<button class="sb-del" onclick="sbMove(${i},1)" title="Move down">↓</button>`:`<button class="sb-del" style="opacity:.3;cursor:default">↓</button>`)+
+      `<button class="sb-del" onclick="removeStackEntry(${i})" title="Remove">×</button>`;
     el.appendChild(div);
   });
   _updateStackStats();
@@ -1713,6 +1827,21 @@ function _drawLayerBoxes(ly,yOff,mir,matsMain,matsAlt,placeBox){
   }
 }
 
+// Cache Image objects for stack builder presets (keyed by sku+face)
+const _sbImgCache={};
+function _sbImgEls(sku){
+  const preset=presets[sku];
+  if(!preset?.fImgData)return {};
+  const els={};
+  Object.keys(preset.fImgData).forEach(f=>{
+    if(!preset.fImgData[f])return;
+    const k=sku+'_'+f;
+    if(!_sbImgCache[k]){const img=new Image();img.src=preset.fImgData[f];_sbImgCache[k]=img;}
+    els[f]=_sbImgCache[k];
+  });
+  return els;
+}
+
 function drawStack(){
   if(!stackMode)return;
   const all=[...CATALOG,...customProducts];
@@ -1722,7 +1851,7 @@ function drawStack(){
 
   const op=parseFloat(document.getElementById('opRange').value)/100;
   const tr=op<1;
-  const emAt=new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.12});
+  const emAt=new THREE.LineBasicMaterial({color:0x111111,transparent:true,opacity:.28});
 
   function placeBox(x,y,z,bx,bh,bz,mats){
     const g=new THREE.BoxGeometry(bx,bh,bz);
@@ -1732,27 +1861,33 @@ function drawStack(){
     boxGrp.add(m);
   }
 
-  // Build a 6-face material array from a hex color string with face-brightness variation
-  function makeMats(hexColor,bright){
-    // [+X right, -X left, +Y top, -Y bottom, +Z front, -Z back]
-    const bs=[1.0,0.82,1.15,0.65,0.92,0.78].map(b=>b*(bright||1));
-    return bs.map(b=>{
-      const c=new THREE.Color(hexColor).multiplyScalar(Math.min(b,1));
-      return new THREE.MeshStandardMaterial({color:c,roughness:.82,metalness:.04,transparent:tr,opacity:op});
-    });
-  }
-
   let yBase=ptop();
 
   stackEntries.forEach((entry,ei)=>{
     const p=entry.prodIdx>=0?all[entry.prodIdx]:null;
-    if(!p)return;
-    const lay=calcLayout(pW,pD,p.bW,p.bL,p.bH,0,'auto',0);
+    if(!p||p.noData)return;
+    const oh=Math.max(0,(p.pW||48)-48,(p.pD||40)-40);
+    const lay=calcLayout(pW,pD,p.bW,p.bL,p.bH,oh,'auto',0);
     if(!lay||!lay.per)return;
 
-    const col=_sbColor(entry.prodIdx,ei);
-    const matsMain=makeMats(col,1);
-    const matsAlt=makeMats(col,0.9); // slightly darker for rotated zone differentiation
+    // Use preset colors/images if saved, else fall back to palette color
+    const preset=presets[p.sku];
+    const bc=preset?.boxCol||_sbColor(entry.prodIdx,ei);
+    const tc=preset?.tapeCol||'#ffffff';
+    const imgEls=_sbImgEls(p.sku);
+
+    // Build mats per zone (flat/rotated)
+    let matsMain,matsAlt;
+    if(lay.mixed){
+      const bxA=lay.bXA||lay.bXFlat, bzA=lay.bZA||lay.bZFlat;
+      const bxB=lay.bXB||lay.bXRot, bzB=lay.bZB||lay.bZRot;
+      matsMain=buildMats(bxA,bzA,false,tr,op,bc,tc,imgEls);
+      matsAlt =buildMats(bxB,bzB,true,tr,op,bc,tc,imgEls);
+    } else {
+      const isRot=lay.label==='rotated';
+      matsMain=buildMats(lay.bX,lay.bZ,isRot,tr,op,bc,tc,imgEls);
+      matsAlt=matsMain;
+    }
 
     for(let l=0;l<entry.layers;l++){
       const yOff=yBase+l*lay.lH+lay.lH/2;
