@@ -2319,13 +2319,39 @@ document.getElementById('custom-modal').addEventListener('click',function(e){if(
 initThree();
 _loadCustom();
 _loadPresetsFromStorage();
-_rebuildCatalog();
-updPP();
-// Start in viewer mode — draw empty pallet, no product pre-selected
+
+// Show empty pallet immediately while defaults load
 setEditMode(false);
-// Draw empty pallet without any boxes (just render the pallet base)
 buildPallet(gv('palW'),gv('palD'));
 rnd.render(scene,cam);
+
+// Load built-in default presets.
+// Order of attempts: 1) local file (dev), 2) GitHub Release asset (production)
+// localStorage user overrides always win over file defaults.
+const PRESETS_URLS=[
+  'presets-default.json',
+  'https://github.com/kubeek33/fj-pallet-calculator/releases/latest/download/presets-default.json'
+];
+(async()=>{
+  let defaults=null;
+  for(const url of PRESETS_URLS){
+    try{
+      const resp=await fetch(url);
+      if(!resp.ok)continue;
+      defaults=await resp.json();
+      break;
+    }catch(e){continue;}
+  }
+  if(defaults){
+    let added=0;
+    Object.keys(defaults).forEach(sku=>{
+      if(!presets[sku]){presets[sku]=defaults[sku];added++;}
+    });
+    if(added>0)toast(`${added} products loaded`);
+  }
+  _rebuildCatalog();
+  updPP();
+})();
 </script>
 </body>
 </html>
