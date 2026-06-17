@@ -1,0 +1,11 @@
+.git
+.gitignore
+.claude
+.DS_Store
+
+# Don't ship the huge files or Figma plugin folder to Railway
+presets-default.js
+Forjars Pallet Calculator/
+
+# Helper scripts not needed in container
+rebuild-figma-ui.sh

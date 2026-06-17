@@ -550,6 +550,14 @@ body.edit-mode #prod-card-wrap{display:none!important}
 </div>
 <div class="toast" id="toast"></div>
 
+
+<!-- Figma export button (plugin-only) -->
+<div style="position:absolute;bottom:20px;left:320px;z-index:9999">
+  <button id="export-to-figma" style="padding:12px 24px;background:#d4161a;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:14px;box-shadow:0 4px 6px rgba(0,0,0,0.1)">
+    Вставити у Figma
+  </button>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -2455,6 +2463,52 @@ function _loadPresetsScript(url){
   _rebuildCatalog();
   updPP();
 })();
+
+// === Figma plugin export ===
+function getCanvasBytes(canvas){
+  return new Promise((resolve,reject)=>{
+    try{
+      canvas.toBlob(async(blob)=>{
+        if(!blob){reject("Blob creation failed");return;}
+        const buffer=await blob.arrayBuffer();
+        resolve(new Uint8Array(buffer));
+      },"image/png");
+    }catch(e){reject(e);}
+  });
+}
+
+document.getElementById('export-to-figma').onclick=async()=>{
+  try{
+    if(typeof rnd==='undefined'||typeof scene==='undefined'||typeof cam==='undefined'){
+      alert("Помилка: 3D-сцена ще не завантажилась.");
+      return;
+    }
+    const originalCam=curCam;
+
+    setCam('iso');
+    rnd.render(scene,cam);
+    const bytes1=await getCanvasBytes(rnd.domElement);
+
+    setCam('top');
+    rnd.render(scene,cam);
+    const bytes2=await getCanvasBytes(rnd.domElement);
+
+    setCam(originalCam);
+    rnd.render(scene,cam);
+
+    parent.postMessage({
+      pluginMessage:{
+        type:'insert-renders',
+        img1:Array.from(bytes1),
+        img2:Array.from(bytes2)
+      }
+    },'*');
+  }catch(error){
+    console.error("Помилка експорту:",error);
+    alert("Сталася помилка при створенні знімків.");
+  }
+};
+// ===============================
 </script>
 </body>
 </html>

@@ -1,0 +1,20 @@
+{
+  "name": "Forjars Pallet Calculator",
+  "id": "1626995159522934084",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://cdnjs.cloudflare.com",
+      "https://cdn.jsdelivr.net",
+      "https://unpkg.com",
+      "https://github.com",
+      "https://release-assets.githubusercontent.com",
+      "https://objects.githubusercontent.com"
+    ]
+  }
+}

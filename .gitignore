@@ -1,5 +1,12 @@
-# Large presets file — upload as GitHub Release asset instead
+# Large presets file — hosted as GitHub Release asset
+presets-default.js
 presets-default.json
+
+# Generated 80MB Figma plugin UI (rebuild via ./rebuild-figma-ui.sh)
+Forjars Pallet Calculator/ui.html
+
+# Claude Code state
+.claude/
 
 # Python server cache
 __pycache__/
@@ -7,3 +14,7 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Editor
+.vscode/
+.idea/
